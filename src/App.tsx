@@ -142,7 +142,6 @@ function App() {
         if (migrated) {
           toast.success(
             t("migration.success", { defaultValue: "配置迁移成功" }),
-            { closeButton: true },
           );
         }
       } catch (error) {
@@ -314,9 +313,9 @@ function App() {
         return <AgentsPanel onOpenChange={() => setCurrentView("providers")} />;
       default:
         return (
-          <div className="mx-auto max-w-[56rem] px-5 flex flex-col h-[calc(100vh-8rem)] overflow-hidden">
+          <div className="mx-auto w-full max-w-none px-5 flex flex-col min-w-0 h-[calc(100vh-8rem)] overflow-visible">
             {/* 独立滚动容器 - 解决 Linux/Ubuntu 下 DndContext 与滚轮事件冲突 */}
-            <div className="flex-1 overflow-y-auto overflow-x-hidden pb-12 px-1">
+            <div className="flex-1 px-1 pb-12 overflow-x-hidden overflow-y-auto">
               <div className="space-y-4">
                 <ProviderList
                   providers={providers}
@@ -342,8 +341,7 @@ function App() {
 
   return (
     <div
-      className="flex min-h-screen flex-col bg-background text-foreground selection:bg-primary/30"
-      style={{ overflowX: "hidden" }}
+      className="flex flex-col min-h-screen bg-background text-foreground selection:bg-primary/30"
     >
       {/* 全局拖拽区域（顶部 4px），避免上边框无法拖动 */}
       <div
@@ -379,18 +377,18 @@ function App() {
       )}
 
       <header
-        className="fixed top-0 z-50 w-full py-3 bg-background/80 backdrop-blur-md transition-all duration-300"
+        className="fixed top-0 z-50 w-full py-3 overflow-visible transition-all duration-300 bg-background/80 backdrop-blur-md"
         data-tauri-drag-region
         style={{ WebkitAppRegion: "drag" } as any}
       >
-        <div className="h-4 w-full" aria-hidden data-tauri-drag-region />
+        <div className="w-full h-4" aria-hidden data-tauri-drag-region />
         <div
-          className="mx-auto max-w-[56rem] px-6 flex flex-wrap items-center justify-between gap-2"
+          className="flex items-center justify-between w-full min-w-0 gap-1 pl-5 pr-5 mx-auto overflow-visible max-w-none whitespace-nowrap"
           data-tauri-drag-region
           style={{ WebkitAppRegion: "drag" } as any}
         >
           <div
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 shrink-0 whitespace-nowrap"
             style={{ WebkitAppRegion: "no-drag" } as any}
           >
             {currentView !== "providers" ? (
@@ -401,7 +399,7 @@ function App() {
                   onClick={() => setCurrentView("providers")}
                   className="mr-2 rounded-lg"
                 >
-                  <ArrowLeft className="h-4 w-4" />
+                  <ArrowLeft className="w-4 h-4" />
                 </Button>
                 <h1 className="text-lg font-semibold">
                   {currentView === "settings" && t("settings.title")}
@@ -414,7 +412,7 @@ function App() {
               </div>
             ) : (
               <>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   <a
                     href="https://github.com/farion1231/cc-switch"
                     target="_blank"
@@ -423,10 +421,10 @@ function App() {
                       "text-xl font-semibold transition-colors",
                       isProxyRunning && isTakeoverActive
                         ? "text-emerald-500 hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300"
-                        : "text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300",
+                        : "text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
                     )}
                   >
-                    CC Switch
+                  CC Switch
                   </a>
                   <Button
                     variant="ghost"
@@ -435,7 +433,7 @@ function App() {
                     title={t("common.settings")}
                     className="hover:bg-black/5 dark:hover:bg-white/5"
                   >
-                    <Settings className="h-4 w-4" />
+                  <Settings className="w-4 h-4"/>
                   </Button>
                 </div>
                 <UpdateBadge onClick={() => setCurrentView("settings")} />
@@ -444,7 +442,7 @@ function App() {
           </div>
 
           <div
-            className="flex items-center gap-2"
+            className="flex items-center gap-1.5 shrink whitespace-nowrap"
             style={{ WebkitAppRegion: "no-drag" } as any}
           >
             {currentView === "prompts" && (
@@ -454,7 +452,7 @@ function App() {
                 className={addActionButtonClass}
                 title={t("prompts.add")}
               >
-                <Plus className="h-5 w-5" />
+                <Plus className="w-5 h-5" />
               </Button>
             )}
             {currentView === "mcp" && (
@@ -464,7 +462,7 @@ function App() {
                 className={addActionButtonClass}
                 title={t("mcp.unifiedPanel.addServer")}
               >
-                <Plus className="h-5 w-5" />
+                <Plus className="w-5 h-5" />
               </Button>
             )}
             {currentView === "skills" && (
@@ -475,7 +473,7 @@ function App() {
                   onClick={() => skillsPageRef.current?.refresh()}
                   className="hover:bg-black/5 dark:hover:bg-white/5"
                 >
-                  <RefreshCw className="h-4 w-4 mr-2" />
+                  <RefreshCw className="w-4 h-4 mr-2" />
                   {t("skills.refresh")}
                 </Button>
                 <Button
@@ -484,7 +482,7 @@ function App() {
                   onClick={() => skillsPageRef.current?.openRepoManager()}
                   className="hover:bg-black/5 dark:hover:bg-white/5"
                 >
-                  <Settings className="h-4 w-4 mr-2" />
+                  <Settings className="w-4 h-4 mr-2" />
                   {t("skills.repoManager")}
                 </Button>
               </>
@@ -495,7 +493,7 @@ function App() {
 
                 <AppSwitcher activeApp={activeApp} onSwitch={setActiveApp} />
 
-                <div className="bg-muted p-1 rounded-xl flex items-center gap-1">
+                <div className="flex items-center gap-1 p-1 bg-muted rounded-xl">
                   {hasSkillsSupport && (
                     <Button
                       variant="ghost"
@@ -504,7 +502,7 @@ function App() {
                       className="text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5"
                       title={t("skills.manage")}
                     >
-                      <Wrench className="h-4 w-4" />
+                      <Wrench className="w-4 h-4" />
                     </Button>
                   )}
                   {/* TODO: Agents 功能开发中，暂时隐藏入口 */}
@@ -516,7 +514,7 @@ function App() {
                       className="text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5"
                       title="Agents"
                     >
-                      <Bot className="h-4 w-4" />
+                      <Bot className="w-4 h-4" />
                     </Button>
                   )} */}
                   <Button
@@ -526,7 +524,7 @@ function App() {
                     className="text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5"
                     title={t("prompts.manage")}
                   >
-                    <Book className="h-4 w-4" />
+                    <Book className="w-4 h-4" />
                   </Button>
                   <Button
                     variant="ghost"
@@ -535,7 +533,7 @@ function App() {
                     className="text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5"
                     title={t("mcp.title")}
                   >
-                    <Server className="h-4 w-4" />
+                    <Server className="w-4 h-4" />
                   </Button>
                 </div>
 
@@ -544,7 +542,7 @@ function App() {
                   size="icon"
                   className={`ml-2 ${addActionButtonClass}`}
                 >
-                  <Plus className="h-5 w-5" />
+                  <Plus className="w-5 h-5" />
                 </Button>
               </>
             )}

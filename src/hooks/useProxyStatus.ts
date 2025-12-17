@@ -32,15 +32,36 @@ export function useProxyStatus() {
     queryFn: () => invoke<boolean>("is_live_takeover_active"),
   });
 
-  // 启动服务器（带 Live 配置接管）
+  // 启动服务器（监控模式 - 不接管 Live 配置）
+  const startMonitoringMutation = useMutation({
+    mutationFn: () => invoke<ProxyServerInfo>("start_proxy_monitoring"),
+    onSuccess: (info) => {
+      toast.success(
+        t("proxy.startedMonitoring", {
+          defaultValue: `代理监控模式已启用 - ${info.address}:${info.port}\n\n请手动配置 Claude/Codex/Gemini 的 API 地址为代理地址以记录统计数据`,
+        }),
+      );
+      queryClient.invalidateQueries({ queryKey: ["proxyStatus"] });
+      queryClient.invalidateQueries({ queryKey: ["proxyTakeoverActive"] });
+    },
+    onError: (error: Error) => {
+      const detail = extractErrorMessage(error) || "未知错误";
+      toast.error(
+        t("proxy.startMonitoringFailed", {
+          defaultValue: `启动监控模式失败: ${detail}`,
+        }),
+      );
+    },
+  });
+
+  // 启动服务器（接管模式 - 自动接管 Live 配置）
   const startWithTakeoverMutation = useMutation({
     mutationFn: () => invoke<ProxyServerInfo>("start_proxy_with_takeover"),
     onSuccess: (info) => {
       toast.success(
         t("proxy.startedWithTakeover", {
-          defaultValue: `代理模式已启用 - ${info.address}:${info.port}`,
+          defaultValue: `代理接管模式已启用 - ${info.address}:${info.port}`,
         }),
-        { closeButton: true },
       );
       queryClient.invalidateQueries({ queryKey: ["proxyStatus"] });
       queryClient.invalidateQueries({ queryKey: ["proxyTakeoverActive"] });
@@ -63,12 +84,9 @@ export function useProxyStatus() {
         t("proxy.stoppedWithRestore", {
           defaultValue: "代理模式已关闭，配置已恢复",
         }),
-        { closeButton: true },
       );
       queryClient.invalidateQueries({ queryKey: ["proxyStatus"] });
       queryClient.invalidateQueries({ queryKey: ["proxyTakeoverActive"] });
-      // 清除所有供应商健康状态缓存（后端已清空数据库记录）
-      queryClient.invalidateQueries({ queryKey: ["providerHealth"] });
     },
     onError: (error: Error) => {
       const detail = extractErrorMessage(error) || "未知错误";
@@ -122,6 +140,8 @@ export function useProxyStatus() {
     isRunning: status?.running || false,
     isTakeoverActive: isTakeoverActive || false,
 
+    // 启动/停止（监控模式）
+    startMonitoring: startMonitoringMutation.mutateAsync,
     // 启动/停止（接管模式）
     startWithTakeover: startWithTakeoverMutation.mutateAsync,
     stopWithRestore: stopWithRestoreMutation.mutateAsync,
@@ -134,9 +154,11 @@ export function useProxyStatus() {
     checkTakeoverActive,
 
     // 加载状态
-    isStarting: startWithTakeoverMutation.isPending,
+    isStarting: startWithTakeoverMutation.isPending || startMonitoringMutation.isPending,
     isStopping: stopWithRestoreMutation.isPending,
     isPending:
-      startWithTakeoverMutation.isPending || stopWithRestoreMutation.isPending,
+      startWithTakeoverMutation.isPending ||
+      startMonitoringMutation.isPending ||
+      stopWithRestoreMutation.isPending,
   };
 }

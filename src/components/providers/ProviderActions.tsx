@@ -7,6 +7,7 @@ import {
   Play,
   TestTube2,
   Trash2,
+  RotateCcw,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,9 @@ interface ProviderActionsProps {
   onTest?: () => void;
   onConfigureUsage: () => void;
   onDelete: () => void;
+  onResetCircuitBreaker?: () => void;
+  isProxyTarget?: boolean;
+  consecutiveFailures?: number;
 }
 
 export function ProviderActions({
@@ -34,6 +38,9 @@ export function ProviderActions({
   onTest,
   onConfigureUsage,
   onDelete,
+  onResetCircuitBreaker,
+  isProxyTarget,
+  consecutiveFailures = 0,
 }: ProviderActionsProps) {
   const { t } = useTranslation();
   const iconButtonClass = "h-8 w-8 p-1";
@@ -52,7 +59,7 @@ export function ProviderActions({
           // 代理接管模式下启用按钮使用绿色
           !isCurrent &&
             isProxyTakeover &&
-            "bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700",
+            "bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700"
         )}
       >
         {isCurrent ? (
@@ -116,6 +123,33 @@ export function ProviderActions({
           <BarChart3 className="h-4 w-4" />
         </Button>
 
+        {/* 重置熔断器按钮 - 代理目标启用时显示 */}
+        {/* TODO: 暂时隐藏，后续根据故障转移功能启用 */}
+        {/* {onResetCircuitBreaker && isProxyTarget && (
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={onResetCircuitBreaker}
+            disabled={consecutiveFailures === 0}
+            title={
+              consecutiveFailures > 0
+                ? t("provider.resetCircuitBreaker", {
+                    defaultValue: "重置熔断器",
+                  })
+                : t("provider.noFailures", {
+                    defaultValue: "当前无失败记录",
+                  })
+            }
+            className={cn(
+              iconButtonClass,
+              consecutiveFailures > 0 &&
+                "hover:text-orange-500 dark:hover:text-orange-400",
+            )}
+          >
+            <RotateCcw className="h-4 w-4" />
+          </Button>
+        )} */}
+
         <Button
           size="icon"
           variant="ghost"
@@ -124,7 +158,7 @@ export function ProviderActions({
           className={cn(
             iconButtonClass,
             !isCurrent && "hover:text-red-500 dark:hover:text-red-400",
-            isCurrent && "opacity-40 cursor-not-allowed text-muted-foreground",
+            isCurrent && "opacity-40 cursor-not-allowed text-muted-foreground"
           )}
         >
           <Trash2 className="h-4 w-4" />

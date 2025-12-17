@@ -23,6 +23,8 @@ export interface Provider {
   // 图标配置
   icon?: string; // 图标名称（如 "openai", "anthropic"）
   iconColor?: string; // 图标颜色（Hex 格式，如 "#00A67E"）
+  // 新增：是否为代理目标
+  isProxyTarget?: boolean;
 }
 
 export interface AppConfig {
@@ -126,6 +128,10 @@ export interface Settings {
   currentProviderCodex?: string;
   // 当前 Gemini 供应商 ID（优先于数据库 is_current）
   currentProviderGemini?: string;
+
+  // ===== 全局 API 配置 =====
+  // 全局统一 API KEY（可选，供所有 AI 工具使用）
+  globalApiKey?: string;
 }
 
 // MCP 服务器连接参数（宽松：允许扩展字段）

@@ -34,7 +34,7 @@ export function CircuitBreakerConfigPanel() {
   const handleSave = async () => {
     try {
       await updateConfig.mutateAsync(formData);
-      toast.success("熔断器配置已保存", { closeButton: true });
+      toast.success("熔断器配置已保存");
     } catch (error) {
       toast.error("保存失败: " + String(error));
     }

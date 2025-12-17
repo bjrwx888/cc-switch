@@ -18,24 +18,27 @@ export function ProviderStatsTable() {
   }
 
   return (
-    <div className="rounded-lg border border-border/50 bg-card/40 backdrop-blur-sm overflow-hidden">
-      <Table>
+    <div className="rounded-lg border border-border/50 bg-card/40 backdrop-blur-sm">
+      <Table
+        className="min-w-[900px]"
+        containerClassName="overflow-x-auto [scrollbar-width:auto] [-ms-overflow-style:auto] [&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground/30 [&::-webkit-scrollbar-thumb:hover]:bg-muted-foreground/50"
+      >
         <TableHeader>
           <TableRow>
-            <TableHead>{t("usage.provider", "Provider")}</TableHead>
-            <TableHead className="text-right">
+            <TableHead className="min-w-[200px] whitespace-nowrap">{t("usage.provider", "Provider")}</TableHead>
+            <TableHead className="text-right min-w-[120px] whitespace-nowrap">
               {t("usage.requests", "请求数")}
             </TableHead>
-            <TableHead className="text-right">
+            <TableHead className="text-right min-w-[150px] whitespace-nowrap">
               {t("usage.tokens", "Tokens")}
             </TableHead>
-            <TableHead className="text-right">
+            <TableHead className="text-right min-w-[120px] whitespace-nowrap">
               {t("usage.cost", "成本")}
             </TableHead>
-            <TableHead className="text-right">
+            <TableHead className="text-right min-w-[120px] whitespace-nowrap">
               {t("usage.successRate", "成功率")}
             </TableHead>
-            <TableHead className="text-right">
+            <TableHead className="text-right min-w-[150px] whitespace-nowrap">
               {t("usage.avgLatency", "平均延迟")}
             </TableHead>
           </TableRow>

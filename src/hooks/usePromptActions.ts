@@ -36,7 +36,7 @@ export function usePromptActions(appId: AppId) {
       try {
         await promptsApi.upsertPrompt(appId, id, prompt);
         await reload();
-        toast.success(t("prompts.saveSuccess"), { closeButton: true });
+        toast.success(t("prompts.saveSuccess"));
       } catch (error) {
         toast.error(t("prompts.saveFailed"));
         throw error;
@@ -50,7 +50,7 @@ export function usePromptActions(appId: AppId) {
       try {
         await promptsApi.deletePrompt(appId, id);
         await reload();
-        toast.success(t("prompts.deleteSuccess"), { closeButton: true });
+        toast.success(t("prompts.deleteSuccess"));
       } catch (error) {
         toast.error(t("prompts.deleteFailed"));
         throw error;
@@ -64,7 +64,7 @@ export function usePromptActions(appId: AppId) {
       try {
         await promptsApi.enablePrompt(appId, id);
         await reload();
-        toast.success(t("prompts.enableSuccess"), { closeButton: true });
+        toast.success(t("prompts.enableSuccess"));
       } catch (error) {
         toast.error(t("prompts.enableFailed"));
         throw error;
@@ -104,14 +104,14 @@ export function usePromptActions(appId: AppId) {
       try {
         if (enabled) {
           await promptsApi.enablePrompt(appId, id);
-          toast.success(t("prompts.enableSuccess"), { closeButton: true });
+          toast.success(t("prompts.enableSuccess"));
         } else {
           // 禁用提示词 - 需要后端支持
           await promptsApi.upsertPrompt(appId, id, {
             ...prompts[id],
             enabled: false,
           });
-          toast.success(t("prompts.disableSuccess"), { closeButton: true });
+          toast.success(t("prompts.disableSuccess"));
         }
         await reload();
       } catch (error) {
@@ -130,7 +130,7 @@ export function usePromptActions(appId: AppId) {
     try {
       const id = await promptsApi.importFromFile(appId);
       await reload();
-      toast.success(t("prompts.importSuccess"), { closeButton: true });
+      toast.success(t("prompts.importSuccess"));
       return id;
     } catch (error) {
       toast.error(t("prompts.importFailed"));

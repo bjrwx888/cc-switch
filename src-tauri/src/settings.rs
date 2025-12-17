@@ -55,6 +55,11 @@ pub struct AppSettings {
     /// 当前 Gemini 供应商 ID（本地存储，优先于数据库 is_current）
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub current_provider_gemini: Option<String>,
+
+    // ===== 全局 API 配置 =====
+    /// 全局统一 API KEY（可选，供所有 AI 工具使用）
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub global_api_key: Option<String>,
 }
 
 fn default_show_in_tray() -> bool {
@@ -79,6 +84,7 @@ impl Default for AppSettings {
             current_provider_claude: None,
             current_provider_codex: None,
             current_provider_gemini: None,
+            global_api_key: None,
         }
     }
 }
@@ -119,6 +125,13 @@ impl AppSettings {
             .as_ref()
             .map(|s| s.trim())
             .filter(|s| matches!(*s, "en" | "zh" | "ja"))
+            .map(|s| s.to_string());
+
+        self.global_api_key = self
+            .global_api_key
+            .as_ref()
+            .map(|s| s.trim())
+            .filter(|s| !s.is_empty())
             .map(|s| s.to_string());
     }
 

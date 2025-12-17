@@ -24,6 +24,9 @@ export const settingsSchema = z.object({
   currentProviderClaude: z.string().optional(),
   currentProviderCodex: z.string().optional(),
   currentProviderGemini: z.string().optional(),
+
+  // 全局 API 配置
+  globalApiKey: z.string().optional().or(z.literal("")),
 });
 
 export type SettingsFormData = z.infer<typeof settingsSchema>;

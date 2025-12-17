@@ -227,7 +227,6 @@ const UsageScriptModal: React.FC<UsageScriptModalProps> = ({
           .join(", ");
         toast.success(`${t("usageScript.testSuccess")}${summary}`, {
           duration: 3000,
-          closeButton: true,
         });
       } else {
         toast.error(
@@ -260,10 +259,7 @@ const UsageScriptModal: React.FC<UsageScriptModalProps> = ({
         printWidth: 80,
       });
       setScript({ ...script, code: formatted.trim() });
-      toast.success(t("usageScript.formatSuccess"), {
-        duration: 1000,
-        closeButton: true,
-      });
+      toast.success(t("usageScript.formatSuccess"), { duration: 1000 });
     } catch (error: any) {
       toast.error(
         `${t("usageScript.formatFailed")}: ${error?.message || t("jsonEditor.invalidJson")}`,
@@ -404,25 +400,15 @@ const UsageScriptModal: React.FC<UsageScriptModalProps> = ({
             {/* 凭证配置 */}
             {shouldShowCredentialsConfig && (
               <div className="space-y-4">
-                <div className="flex items-start justify-between">
-                  <h4 className="text-sm font-medium text-foreground">
-                    {t("usageScript.credentialsConfig")}
-                  </h4>
-                  <p className="text-xs text-muted-foreground">
-                    {t("usageScript.credentialsHint")}
-                  </p>
-                </div>
+                <h4 className="text-sm font-medium text-foreground">
+                  {t("usageScript.credentialsConfig")}
+                </h4>
 
                 <div className="grid gap-4 md:grid-cols-2">
                   {selectedTemplate === TEMPLATE_KEYS.GENERAL && (
                     <>
                       <div className="space-y-2">
-                        <Label htmlFor="usage-api-key">
-                          API Key{" "}
-                          <span className="text-xs text-muted-foreground font-normal">
-                            ({t("usageScript.optional")})
-                          </span>
-                        </Label>
+                        <Label htmlFor="usage-api-key">API Key</Label>
                         <div className="relative">
                           <Input
                             id="usage-api-key"
@@ -431,7 +417,7 @@ const UsageScriptModal: React.FC<UsageScriptModalProps> = ({
                             onChange={(e) =>
                               setScript({ ...script, apiKey: e.target.value })
                             }
-                            placeholder={t("usageScript.apiKeyPlaceholder")}
+                            placeholder="sk-xxxxx"
                             autoComplete="off"
                             className="border-white/10"
                           />
@@ -458,10 +444,7 @@ const UsageScriptModal: React.FC<UsageScriptModalProps> = ({
 
                       <div className="space-y-2">
                         <Label htmlFor="usage-base-url">
-                          {t("usageScript.baseUrl")}{" "}
-                          <span className="text-xs text-muted-foreground font-normal">
-                            ({t("usageScript.optional")})
-                          </span>
+                          {t("usageScript.baseUrl")}
                         </Label>
                         <Input
                           id="usage-base-url"
@@ -470,7 +453,7 @@ const UsageScriptModal: React.FC<UsageScriptModalProps> = ({
                           onChange={(e) =>
                             setScript({ ...script, baseUrl: e.target.value })
                           }
-                          placeholder={t("usageScript.baseUrlPlaceholder")}
+                          placeholder="https://api.example.com"
                           autoComplete="off"
                           className="border-white/10"
                         />

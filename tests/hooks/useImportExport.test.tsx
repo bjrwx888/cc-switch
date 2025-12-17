@@ -180,7 +180,6 @@ describe("useImportExport Hook", () => {
     expect(exportConfigMock).toHaveBeenCalledWith("/export.json");
     expect(toastSuccessMock).toHaveBeenCalledWith(
       expect.stringContaining("/backup/export.json"),
-      expect.objectContaining({ closeButton: true }),
     );
   });
 

@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "CC Switch",
+    "title": "Switch",
     "description": "Claude Code・Codex・Gemini CLI のためのオールインワンアシスタント"
   },
   "common": {
@@ -112,7 +112,7 @@
     "providerAdded": "プロバイダーを追加しました",
     "providerSaved": "プロバイダー設定を保存しました",
     "providerDeleted": "プロバイダーを削除しました",
-    "switchSuccess": "切り替え成功！",
+    "switchSuccess": "切り替え成功！ {{appName}} ターミナルを再起動すると反映されます",
     "switchFailedTitle": "切り替えに失敗しました",
     "switchFailed": "切り替えに失敗しました: {{error}}",
     "autoImported": "既存設定からデフォルトプロバイダーを自動作成しました",
@@ -365,10 +365,7 @@
     "justNow": "たった今",
     "minutesAgo": "{{count}} 分前",
     "hoursAgo": "{{count}} 時間前",
-    "daysAgo": "{{count}} 日前",
-    "multiplePlans": "{{count}} プラン",
-    "expand": "展開",
-    "collapse": "折りたたむ"
+    "daysAgo": "{{count}} 日前"
   },
   "usageScript": {
     "title": "利用状況を設定",
@@ -381,10 +378,6 @@
     "templateGeneral": "General",
     "templateNewAPI": "NewAPI",
     "credentialsConfig": "認証情報",
-    "credentialsHint": "空欄の場合はプロバイダー設定を使用",
-    "optional": "オプション",
-    "apiKeyPlaceholder": "空欄の場合はプロバイダーの API Key を使用",
-    "baseUrlPlaceholder": "空欄の場合はプロバイダーの Base URL を使用",
     "baseUrl": "Base URL",
     "accessToken": "Access Token",
     "accessTokenPlaceholder": "「Security Settings」で生成",
@@ -541,6 +534,9 @@
     "env": "環境変数（1 行に 1 件、KEY=VALUE）",
     "envPlaceholder": "FOO=bar\nHELLO=world",
     "reset": "リセット",
+    "notice": {
+      "restartClaude": "書き込みました。Claude を再起動すると反映されます。"
+    },
     "msg": {
       "saved": "保存しました",
       "deleted": "削除しました",

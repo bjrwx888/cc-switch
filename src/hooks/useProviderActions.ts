@@ -119,7 +119,6 @@ export function useProviderActions(activeApp: AppId) {
           t("provider.usageSaved", {
             defaultValue: "用量查询配置已保存",
           }),
-          { closeButton: true },
         );
       } catch (error) {
         const detail =

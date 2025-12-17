@@ -6,6 +6,7 @@ import {
   type StreamCheckResult,
 } from "@/lib/api/model-test";
 import type { AppId } from "@/lib/api";
+import { failoverApi } from "@/lib/api/failover";
 
 export function useStreamCheck(appId: AppId) {
   const { t } = useTranslation();
@@ -28,8 +29,15 @@ export function useStreamCheck(appId: AppId) {
               time: result.responseTimeMs,
               defaultValue: `${providerName} 运行正常 (${result.responseTimeMs}ms)`,
             }),
-            { closeButton: true },
           );
+
+          // 测试成功后重置健康状态（清除熔断/降级标记）
+          try {
+            await failoverApi.resetCircuitBreaker(providerId, appId);
+          } catch (e) {
+            // 静默失败，不影响测试结果展示
+            console.warn("Failed to reset circuit breaker after successful test:", e);
+          }
         } else if (result.status === "degraded") {
           toast.warning(
             t("streamCheck.degraded", {

@@ -120,7 +120,6 @@ describe("useImportExport Hook (edge cases)", () => {
     expect(exportConfigMock).toHaveBeenCalledWith("/exports/config.json");
     expect(toastSuccessMock).toHaveBeenCalledWith(
       expect.stringContaining("/final/config.json"),
-      expect.objectContaining({ closeButton: true }),
     );
   });
 });

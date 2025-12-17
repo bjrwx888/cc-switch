@@ -309,7 +309,6 @@ export function useSettings(): UseSettingsResult {
             t("notifications.settingsSaved", {
               defaultValue: "设置已保存",
             }),
-            { closeButton: true },
           );
         }
 

@@ -146,7 +146,7 @@ export function RequestLogTable() {
               className="h-8 w-[200px] bg-background"
               value={
                 tempFilters.startDate
-                  ? new Date(tempFilters.startDate * 1000)
+                  ? new Date(tempFilters.startDate * 1000 - new Date().getTimezoneOffset() * 60000)
                       .toISOString()
                       .slice(0, 16)
                   : ""
@@ -166,7 +166,7 @@ export function RequestLogTable() {
               className="h-8 w-[200px] bg-background"
               value={
                 tempFilters.endDate
-                  ? new Date(tempFilters.endDate * 1000)
+                  ? new Date(tempFilters.endDate * 1000 - new Date().getTimezoneOffset() * 60000)
                       .toISOString()
                       .slice(0, 16)
                   : ""
@@ -217,38 +217,41 @@ export function RequestLogTable() {
         <div className="h-[400px] animate-pulse rounded bg-gray-100" />
       ) : (
         <>
-          <div className="rounded-lg border border-border/50 bg-card/40 backdrop-blur-sm overflow-x-auto">
-            <Table>
+          <div className="rounded-lg border border-border/50 bg-card/40 backdrop-blur-sm">
+            <Table
+              className="min-w-[1400px]"
+              containerClassName="max-h-[65vh] overflow-auto [scrollbar-width:auto] [-ms-overflow-style:auto] [&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground/30 [&::-webkit-scrollbar-thumb:hover]:bg-muted-foreground/50"
+            >
               <TableHeader>
                 <TableRow>
-                  <TableHead className="whitespace-nowrap">
+                  <TableHead className="whitespace-nowrap sticky top-0 z-10 bg-card/95 backdrop-blur-sm">
                     {t("usage.time", "时间")}
                   </TableHead>
-                  <TableHead className="whitespace-nowrap">
+                  <TableHead className="whitespace-nowrap sticky top-0 z-10 bg-card/95 backdrop-blur-sm">
                     {t("usage.provider", "供应商")}
                   </TableHead>
-                  <TableHead className="min-w-[280px] whitespace-nowrap">
+                  <TableHead className="min-w-[280px] whitespace-nowrap sticky top-0 z-10 bg-card/95 backdrop-blur-sm">
                     {t("usage.billingModel", "计费模型")}
                   </TableHead>
-                  <TableHead className="text-right whitespace-nowrap">
+                  <TableHead className="text-right whitespace-nowrap sticky top-0 z-10 bg-card/95 backdrop-blur-sm">
                     {t("usage.inputTokens", "输入")}
                   </TableHead>
-                  <TableHead className="text-right whitespace-nowrap">
+                  <TableHead className="text-right whitespace-nowrap sticky top-0 z-10 bg-card/95 backdrop-blur-sm">
                     {t("usage.outputTokens", "输出")}
                   </TableHead>
-                  <TableHead className="text-right min-w-[90px] whitespace-nowrap">
+                  <TableHead className="text-right min-w-[90px] whitespace-nowrap sticky top-0 z-10 bg-card/95 backdrop-blur-sm">
                     {t("usage.cacheReadTokens", "缓存读取")}
                   </TableHead>
-                  <TableHead className="text-right min-w-[90px] whitespace-nowrap">
+                  <TableHead className="text-right min-w-[90px] whitespace-nowrap sticky top-0 z-10 bg-card/95 backdrop-blur-sm">
                     {t("usage.cacheCreationTokens", "缓存写入")}
                   </TableHead>
-                  <TableHead className="text-right whitespace-nowrap">
+                  <TableHead className="text-right whitespace-nowrap sticky top-0 z-10 bg-card/95 backdrop-blur-sm">
                     {t("usage.totalCost", "成本")}
                   </TableHead>
-                  <TableHead className="text-center min-w-[140px] whitespace-nowrap">
+                  <TableHead className="text-center min-w-[140px] whitespace-nowrap sticky top-0 z-10 bg-card/95 backdrop-blur-sm">
                     {t("usage.timingInfo", "用时/首字")}
                   </TableHead>
-                  <TableHead className="whitespace-nowrap">
+                  <TableHead className="whitespace-nowrap sticky top-0 z-10 bg-card/95 backdrop-blur-sm">
                     {t("usage.status", "状态")}
                   </TableHead>
                 </TableRow>
