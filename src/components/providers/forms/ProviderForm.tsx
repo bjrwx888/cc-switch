@@ -83,6 +83,7 @@ interface ProviderFormProps {
     iconColor?: string;
   };
   showButtons?: boolean;
+  isProxyTakeover?: boolean;
 }
 
 export function ProviderForm({
@@ -93,6 +94,7 @@ export function ProviderForm({
   onCancel,
   initialData,
   showButtons = true,
+  isProxyTakeover = false,
 }: ProviderFormProps) {
   const { t } = useTranslation();
   const isEditMode = Boolean(initialData);
@@ -754,6 +756,7 @@ export function ProviderForm({
             presetCategoryLabels={presetCategoryLabels}
             onPresetChange={handlePresetChange}
             category={category}
+            isProxyTakeover={isProxyTakeover}
           />
         )}
 

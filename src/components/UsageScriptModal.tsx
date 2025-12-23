@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { FullScreenPanel } from "@/components/common/FullScreenPanel";
 import { cn } from "@/lib/utils";
+import { useProxyStatus } from "@/hooks/useProxyStatus";
 
 interface UsageScriptModalProps {
   provider: Provider;
@@ -109,6 +110,8 @@ const UsageScriptModal: React.FC<UsageScriptModalProps> = ({
   onSave,
 }) => {
   const { t } = useTranslation();
+  const { isRunning, isTakeoverActive } = useProxyStatus();
+  const isProxyTakeover = isRunning && isTakeoverActive;
 
   // 生成带国际化的预设模板
   const PRESET_TEMPLATES = generatePresetTemplates(t);
@@ -338,7 +341,11 @@ const UsageScriptModal: React.FC<UsageScriptModalProps> = ({
         </Button>
         <Button
           onClick={handleSave}
-          className="bg-primary text-primary-foreground hover:bg-primary/90"
+          className={cn(
+            isProxyTakeover
+              ? "bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white"
+              : "bg-primary text-primary-foreground hover:bg-primary/90"
+          )}
         >
           <Save size={16} className="mr-2" />
           {t("usageScript.saveConfig")}

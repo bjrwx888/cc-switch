@@ -23,9 +23,13 @@ import { useModelPricing, useDeleteModelPricing } from "@/lib/query/usage";
 import { PricingEditModal } from "./PricingEditModal";
 import type { ModelPricing } from "@/types/usage";
 import { Plus, Pencil, Trash2, ChevronDown, ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useProxyStatus } from "@/hooks/useProxyStatus";
 
 export function PricingConfigPanel() {
   const { t } = useTranslation();
+  const { isRunning, isTakeoverActive } = useProxyStatus();
+  const isProxyTakeover = isRunning && isTakeoverActive;
   const { data: pricing, isLoading, error } = useModelPricing();
   const deleteMutation = useDeleteModelPricing();
   const [editingModel, setEditingModel] = useState<ModelPricing | null>(null);
@@ -115,6 +119,11 @@ export function PricingConfigPanel() {
             handleAddNew();
           }}
           size="sm"
+          className={cn(
+            isProxyTakeover
+              ? "bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700"
+              : ""
+          )}
         >
           <Plus className="mr-1 h-4 w-4" />
           {t("common.add", "新增")}

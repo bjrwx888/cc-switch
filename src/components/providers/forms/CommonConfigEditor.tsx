@@ -5,6 +5,8 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Save } from "lucide-react";
 import JsonEditor from "@/components/JsonEditor";
+import { useProxyStatus } from "@/hooks/useProxyStatus";
+import { cn } from "@/lib/utils";
 
 interface CommonConfigEditorProps {
   value: string;
@@ -33,6 +35,8 @@ export function CommonConfigEditor({
 }: CommonConfigEditorProps) {
   const { t } = useTranslation();
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const { isRunning, isTakeoverActive } = useProxyStatus();
+  const isProxyTakeover = isRunning && isTakeoverActive;
 
   useEffect(() => {
     setIsDarkMode(document.documentElement.classList.contains("dark"));
@@ -114,7 +118,16 @@ export function CommonConfigEditor({
             <Button type="button" variant="outline" onClick={onModalClose}>
               {t("common.cancel")}
             </Button>
-            <Button type="button" onClick={onModalClose} className="gap-2">
+            <Button
+              type="button"
+              onClick={onModalClose}
+              className={cn(
+                "gap-2",
+                isProxyTakeover
+                  ? "bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700"
+                  : ""
+              )}
+            >
               <Save className="w-4 h-4" />
               {t("common.save")}
             </Button>

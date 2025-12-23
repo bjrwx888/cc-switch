@@ -174,7 +174,7 @@ export function UsageDashboard() {
       <UsageTrendChart days={days} />
 
       <div className="space-y-4">
-        <Tabs defaultValue="logs" className="w-full">
+        <Tabs defaultValue="logs" className="w-full" isProxyTakeover={isActive}>
           <div className="flex items-center justify-between mb-4">
             <TabsList className="bg-muted/50">
               <TabsTrigger value="logs" className="gap-2">

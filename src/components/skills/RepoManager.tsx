@@ -13,6 +13,8 @@ import { Label } from "@/components/ui/label";
 import { Trash2, ExternalLink, Plus } from "lucide-react";
 import { settingsApi } from "@/lib/api";
 import type { Skill, SkillRepo } from "@/lib/api/skills";
+import { useProxyStatus } from "@/hooks/useProxyStatus";
+import { cn } from "@/lib/utils";
 
 interface RepoManagerProps {
   open: boolean;
@@ -35,6 +37,8 @@ export function RepoManager({
   const [repoUrl, setRepoUrl] = useState("");
   const [branch, setBranch] = useState("");
   const [error, setError] = useState("");
+  const { isRunning, isTakeoverActive } = useProxyStatus();
+  const isProxyTakeover = isRunning && isTakeoverActive;
 
   const getSkillCount = (repo: SkillRepo) =>
     skills.filter(
@@ -129,8 +133,12 @@ export function RepoManager({
                   />
                   <Button
                     onClick={handleAdd}
-                    className="w-full sm:w-auto sm:px-4"
-                    variant="mcp"
+                    className={cn(
+                      "w-full sm:w-auto sm:px-4",
+                      isProxyTakeover
+                        ? "bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700"
+                        : ""
+                    )}
                     type="button"
                   >
                     <Plus className="h-4 w-4 mr-2" />

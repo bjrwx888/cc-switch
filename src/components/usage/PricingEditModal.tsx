@@ -11,8 +11,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Save, Plus } from "lucide-react";
 import { useUpdateModelPricing } from "@/lib/query/usage";
 import type { ModelPricing } from "@/types/usage";
+import { useProxyStatus } from "@/hooks/useProxyStatus";
+import { cn } from "@/lib/utils";
 
 interface PricingEditModalProps {
   model: ModelPricing;
@@ -27,6 +30,8 @@ export function PricingEditModal({
 }: PricingEditModalProps) {
   const { t } = useTranslation();
   const updatePricing = useUpdateModelPricing();
+  const { isRunning, isTakeoverActive } = useProxyStatus();
+  const isProxyTakeover = isRunning && isTakeoverActive;
 
   const [formData, setFormData] = useState({
     modelId: model.modelId,
@@ -127,7 +132,7 @@ export function PricingEditModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="inputCost">
+            <Label htmlFor="inputCost" className="whitespace-nowrap">
               {t("usage.inputCostPerMillion", "输入成本 (每百万 tokens, USD)")}
             </Label>
             <Input
@@ -144,7 +149,7 @@ export function PricingEditModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="outputCost">
+            <Label htmlFor="outputCost" className="whitespace-nowrap">
               {t("usage.outputCostPerMillion", "输出成本 (每百万 tokens, USD)")}
             </Label>
             <Input
@@ -161,7 +166,7 @@ export function PricingEditModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="cacheReadCost">
+            <Label htmlFor="cacheReadCost" className="whitespace-nowrap">
               {t(
                 "usage.cacheReadCostPerMillion",
                 "缓存读取成本 (每百万 tokens, USD)",
@@ -181,7 +186,7 @@ export function PricingEditModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="cacheCreationCost">
+            <Label htmlFor="cacheCreationCost" className="whitespace-nowrap">
               {t(
                 "usage.cacheCreationCostPerMillion",
                 "缓存写入成本 (每百万 tokens, USD)",
@@ -204,11 +209,24 @@ export function PricingEditModal({
             <Button type="button" variant="outline" onClick={onClose}>
               {t("common.cancel", "取消")}
             </Button>
-            <Button type="submit" disabled={updatePricing.isPending}>
+            <Button
+              type="submit"
+              disabled={updatePricing.isPending}
+              className={cn(
+                isProxyTakeover
+                  ? "bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700"
+                  : ""
+              )}
+            >
+              {isNew ? (
+                <Plus className="mr-2 h-4 w-4" />
+              ) : (
+                <Save className="mr-2 h-4 w-4" />
+              )}
               {updatePricing.isPending
                 ? t("common.saving", "保存中...")
                 : isNew
-                  ? t("common.add", "新增")
+                  ? t("common.add", "添加")
                   : t("common.save", "保存")}
             </Button>
           </DialogFooter>

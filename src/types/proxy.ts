@@ -51,6 +51,7 @@ export interface ProviderHealth {
 
 // 熔断器相关类型
 export interface CircuitBreakerConfig {
+  enabled: boolean;
   failureThreshold: number;
   successThreshold: number;
   timeoutSeconds: number;

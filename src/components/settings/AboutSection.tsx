@@ -17,9 +17,11 @@ import { settingsApi } from "@/lib/api";
 import { useUpdate } from "@/contexts/UpdateContext";
 import { relaunchApp } from "@/lib/updater";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface AboutSectionProps {
   isPortable: boolean;
+  isProxyTakeover?: boolean;
 }
 
 interface ToolVersion {
@@ -29,7 +31,7 @@ interface ToolVersion {
   error: string | null;
 }
 
-export function AboutSection({ isPortable }: AboutSectionProps) {
+export function AboutSection({ isPortable, isProxyTakeover = false }: AboutSectionProps) {
   // ... (use hooks as before) ...
   const { t } = useTranslation();
   const [version, setVersion] = useState<string | null>(null);
@@ -201,7 +203,12 @@ export function AboutSection({ isPortable }: AboutSectionProps) {
               size="sm"
               onClick={handleCheckUpdate}
               disabled={isChecking || isDownloading}
-              className="min-w-[140px] h-9"
+              className={cn(
+                "min-w-[140px] h-9",
+                isProxyTakeover
+                  ? "bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700"
+                  : "bg-primary hover:bg-primary/90"
+              )}
             >
               {isDownloading ? (
                 <span className="inline-flex items-center gap-2">

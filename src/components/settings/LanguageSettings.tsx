@@ -7,9 +7,10 @@ type LanguageOption = "zh" | "en" | "ja";
 interface LanguageSettingsProps {
   value: LanguageOption;
   onChange: (value: LanguageOption) => void;
+  isProxyTakeover?: boolean;
 }
 
-export function LanguageSettings({ value, onChange }: LanguageSettingsProps) {
+export function LanguageSettings({ value, onChange, isProxyTakeover = false }: LanguageSettingsProps) {
   const { t } = useTranslation();
 
   return (
@@ -21,13 +22,13 @@ export function LanguageSettings({ value, onChange }: LanguageSettingsProps) {
         </p>
       </header>
       <div className="inline-flex gap-1 rounded-md border border-border-default bg-background p-1">
-        <LanguageButton active={value === "zh"} onClick={() => onChange("zh")}>
+        <LanguageButton active={value === "zh"} onClick={() => onChange("zh")} isProxyTakeover={isProxyTakeover}>
           {t("settings.languageOptionChinese")}
         </LanguageButton>
-        <LanguageButton active={value === "en"} onClick={() => onChange("en")}>
+        <LanguageButton active={value === "en"} onClick={() => onChange("en")} isProxyTakeover={isProxyTakeover}>
           {t("settings.languageOptionEnglish")}
         </LanguageButton>
-        <LanguageButton active={value === "ja"} onClick={() => onChange("ja")}>
+        <LanguageButton active={value === "ja"} onClick={() => onChange("ja")} isProxyTakeover={isProxyTakeover}>
           {t("settings.languageOptionJapanese")}
         </LanguageButton>
       </div>
@@ -39,9 +40,10 @@ interface LanguageButtonProps {
   active: boolean;
   onClick: () => void;
   children: React.ReactNode;
+  isProxyTakeover?: boolean;
 }
 
-function LanguageButton({ active, onClick, children }: LanguageButtonProps) {
+function LanguageButton({ active, onClick, children, isProxyTakeover = false }: LanguageButtonProps) {
   return (
     <Button
       type="button"
@@ -51,7 +53,12 @@ function LanguageButton({ active, onClick, children }: LanguageButtonProps) {
       className={cn(
         "min-w-[96px]",
         active
-          ? "shadow-sm"
+          ? cn(
+              "shadow-sm",
+              isProxyTakeover
+                ? "bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700"
+                : "bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
+            )
           : "text-muted-foreground hover:text-foreground hover:bg-muted",
       )}
     >

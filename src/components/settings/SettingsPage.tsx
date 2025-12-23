@@ -44,6 +44,7 @@ import type { SettingsFormState } from "@/hooks/useSettings";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { useProxyStatus } from "@/hooks/useProxyStatus";
+import { cn } from "@/lib/utils";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -175,6 +176,7 @@ export function SettingsPage({
 
   const {
     isRunning,
+    isTakeoverActive,
     startWithTakeover: startProxy,
     stopWithRestore: stopProxy,
     isPending: isProxyPending,
@@ -204,6 +206,7 @@ export function SettingsPage({
           value={activeTab}
           onValueChange={setActiveTab}
           className="flex flex-col h-full"
+          isProxyTakeover={isRunning && isTakeoverActive}
         >
           <TabsList className="grid w-full grid-cols-4 mb-6 glass rounded-lg">
             <TabsTrigger value="general">
@@ -225,17 +228,20 @@ export function SettingsPage({
                   <LanguageSettings
                     value={settings.language}
                     onChange={(lang) => handleAutoSave({ language: lang })}
+                    isProxyTakeover={isRunning && isTakeoverActive}
                   />
-                  <ThemeSettings />
+                  <ThemeSettings isProxyTakeover={isRunning && isTakeoverActive} />
                   <GlobalApiKeySettings
                     value={settings.globalApiKey || ""}
                     onChange={(apiKey) =>
                       handleAutoSave({ globalApiKey: apiKey })
                     }
+                    isProxyTakeover={isRunning && isTakeoverActive}
                   />
                   <WindowSettings
                     settings={settings}
                     onChange={handleAutoSave}
+                    isProxyTakeover={isRunning && isTakeoverActive}
                   />
                 </>
               ) : null}
@@ -306,7 +312,12 @@ export function SettingsPage({
                           >
                             <Badge
                               variant={isRunning ? "default" : "secondary"}
-                              className="gap-1.5 h-6"
+                              className={cn(
+                                "gap-1.5 h-6",
+                                isRunning && isTakeoverActive
+                                  ? "bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600"
+                                  : ""
+                              )}
                             >
                               <Activity
                                 className={`h-3 w-3 ${isRunning ? "animate-pulse" : ""}`}
@@ -317,6 +328,7 @@ export function SettingsPage({
                               checked={isRunning}
                               onCheckedChange={handleToggleProxy}
                               disabled={isProxyPending}
+                              isProxyTakeover={isRunning && isTakeoverActive}
                             />
                           </div>
                         </div>
@@ -374,6 +386,7 @@ export function SettingsPage({
                               <Switch
                                 checked={failoverEnabled}
                                 onCheckedChange={setFailoverEnabled}
+                                isProxyTakeover={isRunning && isTakeoverActive}
                               />
                             </div>
                           </div>
@@ -433,6 +446,7 @@ export function SettingsPage({
                           errorMessage={errorMessage}
                           backupId={backupId}
                           isImporting={isImporting}
+                          isProxyTakeover={isRunning && isTakeoverActive}
                           onSelectFile={selectImportFile}
                           onImport={importConfig}
                           onExport={exportConfig}
@@ -445,7 +459,12 @@ export function SettingsPage({
                   <div className="pt-4">
                     <Button
                       onClick={handleSave}
-                      className="w-full h-12 text-base font-medium"
+                      className={cn(
+                        "w-full h-12 text-base font-medium",
+                        isRunning && isTakeoverActive
+                          ? "bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700"
+                          : "bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
+                      )}
                       disabled={isSaving}
                     >
                       {isSaving ? (
@@ -466,7 +485,7 @@ export function SettingsPage({
             </TabsContent>
 
             <TabsContent value="about" className="mt-0">
-              <AboutSection isPortable={isPortable} />
+              <AboutSection isPortable={isPortable} isProxyTakeover={isRunning && isTakeoverActive} />
             </TabsContent>
 
             <TabsContent value="usage" className="mt-0">
@@ -499,7 +518,11 @@ export function SettingsPage({
             </Button>
             <Button
               onClick={handleRestartNow}
-              className="bg-primary hover:bg-primary/90"
+              className={cn(
+                isRunning && isTakeoverActive
+                  ? "bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700"
+                  : "bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
+              )}
             >
               {t("settings.restartNow")}
             </Button>

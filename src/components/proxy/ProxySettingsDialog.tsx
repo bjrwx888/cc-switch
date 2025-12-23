@@ -1,7 +1,3 @@
-/**
- * 代理服务设置对话框
- */
-
 import {
   Form,
   FormControl,
@@ -25,6 +21,7 @@ import { FullScreenPanel } from "@/components/common/FullScreenPanel";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import type { ProxyConfig } from "@/types/proxy";
+import { cn } from "@/lib/utils";
 
 // 表单数据类型（不包含 enabled 字段，该字段由后端自动管理）
 type ProxyConfigForm = Omit<ProxyConfig, "enabled">;
@@ -93,11 +90,13 @@ const createProxyConfigSchema = (t: TFunction) => {
 interface ProxySettingsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  isProxyTakeover?: boolean;
 }
 
 export function ProxySettingsDialog({
   open,
   onOpenChange,
+  isProxyTakeover = false,
 }: ProxySettingsDialogProps) {
   const { config, isLoading, updateConfig, isUpdating } = useProxyConfig();
   const { t } = useTranslation();
@@ -160,6 +159,11 @@ export function ProxySettingsDialog({
             type="submit"
             form={formId}
             disabled={isUpdating || isLoading}
+            className={cn(
+              isProxyTakeover
+                ? "bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700"
+                : ""
+            )}
           >
             {isUpdating
               ? t("common.saving", { defaultValue: "保存中..." })

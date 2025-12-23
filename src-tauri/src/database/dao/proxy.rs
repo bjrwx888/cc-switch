@@ -220,17 +220,18 @@ impl Database {
 
         let config = conn
             .query_row(
-                "SELECT failure_threshold, success_threshold, timeout_seconds,
+                "SELECT enabled, failure_threshold, success_threshold, timeout_seconds,
                         error_rate_threshold, min_requests
                  FROM circuit_breaker_config WHERE id = 1",
                 [],
                 |row| {
                     Ok(crate::proxy::circuit_breaker::CircuitBreakerConfig {
-                        failure_threshold: row.get::<_, i32>(0)? as u32,
-                        success_threshold: row.get::<_, i32>(1)? as u32,
-                        timeout_seconds: row.get::<_, i64>(2)? as u64,
-                        error_rate_threshold: row.get(3)?,
-                        min_requests: row.get::<_, i32>(4)? as u32,
+                        enabled: row.get::<_, i32>(0)? != 0,
+                        failure_threshold: row.get::<_, i32>(1)? as u32,
+                        success_threshold: row.get::<_, i32>(2)? as u32,
+                        timeout_seconds: row.get::<_, i64>(3)? as u64,
+                        error_rate_threshold: row.get(4)?,
+                        min_requests: row.get::<_, i32>(5)? as u32,
                     })
                 },
             )
@@ -248,14 +249,16 @@ impl Database {
 
         conn.execute(
             "UPDATE circuit_breaker_config
-             SET failure_threshold = ?1,
-                 success_threshold = ?2,
-                 timeout_seconds = ?3,
-                 error_rate_threshold = ?4,
-                 min_requests = ?5,
+             SET enabled = ?1,
+                 failure_threshold = ?2,
+                 success_threshold = ?3,
+                 timeout_seconds = ?4,
+                 error_rate_threshold = ?5,
+                 min_requests = ?6,
                  updated_at = CURRENT_TIMESTAMP
              WHERE id = 1",
             rusqlite::params![
+                config.enabled as i32,
                 config.failure_threshold as i32,
                 config.success_threshold as i32,
                 config.timeout_seconds as i64,

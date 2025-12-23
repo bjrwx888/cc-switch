@@ -2,7 +2,17 @@ import * as React from "react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { cn } from "@/lib/utils";
 
-const Tabs = TabsPrimitive.Root;
+const TabsContext = React.createContext<{ isProxyTakeover?: boolean }>({});
+
+const Tabs = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root> & { isProxyTakeover?: boolean }
+>(({ isProxyTakeover, ...props }, ref) => (
+  <TabsContext.Provider value={{ isProxyTakeover }}>
+    <TabsPrimitive.Root ref={ref} {...props} />
+  </TabsContext.Provider>
+));
+Tabs.displayName = TabsPrimitive.Root.displayName;
 
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
@@ -22,16 +32,22 @@ TabsList.displayName = TabsPrimitive.List.displayName;
 const TabsTrigger = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
->(({ className, ...props }, ref) => (
-  <TabsPrimitive.Trigger
-    ref={ref}
-    className={cn(
-      "inline-flex min-w-[120px] items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-sm dark:data-[state=active]:bg-blue-600 data-[state=inactive]:opacity-60 data-[state=inactive]:hover:opacity-100 data-[state=inactive]:hover:bg-muted/50",
-      className,
-    )}
-    {...props}
-  />
-));
+>(({ className, ...props }, ref) => {
+  const { isProxyTakeover } = React.useContext(TabsContext);
+  return (
+    <TabsPrimitive.Trigger
+      ref={ref}
+      className={cn(
+        "inline-flex min-w-[120px] items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:text-white data-[state=active]:shadow-sm data-[state=inactive]:opacity-60 data-[state=inactive]:hover:opacity-100 data-[state=inactive]:hover:bg-muted/50",
+        isProxyTakeover
+          ? "data-[state=active]:bg-emerald-500 dark:data-[state=active]:bg-emerald-600"
+          : "data-[state=active]:bg-blue-500 dark:data-[state=active]:bg-blue-600",
+        className,
+      )}
+      {...props}
+    />
+  );
+});
 TabsTrigger.displayName = TabsPrimitive.Trigger.displayName;
 
 const TabsContent = React.forwardRef<

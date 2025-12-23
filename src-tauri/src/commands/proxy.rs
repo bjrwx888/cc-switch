@@ -83,17 +83,39 @@ pub async fn switch_proxy_provider(
 
 // ==================== 故障转移相关命令 ====================
 
-/// 获取代理目标列表
+/// 获取代理目标列表（自动同步模式：返回所有正常的供应商，过滤熔断的）
 #[tauri::command]
 pub async fn get_proxy_targets(
     state: tauri::State<'_, AppState>,
     app_type: String,
 ) -> Result<Vec<Provider>, String> {
     let db = &state.db;
-    db.get_proxy_targets(&app_type)
-        .await
-        .map_err(|e| e.to_string())
-        .map(|providers| providers.into_values().collect())
+    // 获取所有供应商
+    let all_providers = db.get_all_providers(&app_type)
+        .map_err(|e| e.to_string())?;
+
+    // 过滤掉熔断的供应商（consecutive_failures >= failure_threshold）
+    let config = db.get_circuit_breaker_config().await.unwrap_or_default();
+    let failure_threshold = config.failure_threshold;
+
+    let mut healthy_providers = Vec::new();
+    for provider in all_providers.into_values() {
+        // 检查健康状态
+        match db.get_provider_health(&provider.id, &app_type).await {
+            Ok(health) => {
+                // 如果连续失败次数小于阈值，认为是正常的
+                if health.consecutive_failures < failure_threshold {
+                    healthy_providers.push(provider);
+                }
+            }
+            Err(_) => {
+                // 没有健康记录，认为是正常的（新供应商）
+                healthy_providers.push(provider);
+            }
+        }
+    }
+
+    Ok(healthy_providers)
 }
 
 /// 设置代理目标
@@ -191,4 +213,99 @@ pub async fn get_circuit_breaker_stats(
     // 目前先返回 None，后续可以通过 ProxyService 暴露接口来实现
     let _ = (state, provider_id, app_type);
     Ok(None)
+}
+
+/// 测试供应商连接是否正常
+#[tauri::command]
+pub async fn test_provider_connection(
+    state: tauri::State<'_, AppState>,
+    provider_id: String,
+    app_type: String,
+) -> Result<bool, String> {
+    let db = &state.db;
+
+    // 获取供应商信息
+    let provider = db
+        .get_provider_by_id(&provider_id, &app_type)
+        .map_err(|e| e.to_string())?
+        .ok_or_else(|| format!("Provider {} not found", provider_id))?;
+
+    // 从 provider 配置中提取 base_url 和 api_key
+    let settings = provider
+        .settings_config
+        .as_object()
+        .ok_or("Invalid provider config")?;
+
+    let base_url = settings
+        .get("baseUrl")
+        .and_then(|v| v.as_str())
+        .ok_or("No baseUrl found in provider config")?;
+
+    let api_key = settings
+        .get("apiKey")
+        .and_then(|v| v.as_str())
+        .ok_or("No apiKey found in provider config")?;
+
+    // 创建 HTTP 客户端
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(10))
+        .build()
+        .map_err(|e| format!("Failed to create HTTP client: {}", e))?;
+
+    // 发送测试请求
+    let test_url = format!("{}/v1/messages", base_url.trim_end_matches('/'));
+    let test_body = serde_json::json!({
+        "model": "claude-3-haiku-20240307",
+        "max_tokens": 1,
+        "messages": [{"role": "user", "content": "test"}]
+    });
+
+    let response = client
+        .post(&test_url)
+        .header("x-api-key", api_key)
+        .header("anthropic-version", "2023-06-01")
+        .header("content-type", "application/json")
+        .json(&test_body)
+        .send()
+        .await
+        .map_err(|e| format!("Request failed: {}", e))?;
+
+    let status = response.status();
+
+    // 判断是否成功
+    // 200-299 表示成功
+    // 401/403 表示认证问题，但连接是通的
+    // 429 表示限流，但连接是通的
+    // 其他 4xx 错误可能是请求格式问题，但连接是通的
+    let success = status.is_success()
+        || status.as_u16() == 401
+        || status.as_u16() == 403
+        || status.as_u16() == 429
+        || (status.as_u16() >= 400 && status.as_u16() < 500);
+
+    // 更新健康状态
+    if success {
+        let _ = db
+            .update_provider_health(&provider_id, &app_type, true, None)
+            .await;
+        log::info!(
+            "Provider {} ({}) test passed, status: {}",
+            provider.name,
+            provider_id,
+            status
+        );
+    } else {
+        let error_msg = format!("Server error: {}", status);
+        let _ = db
+            .update_provider_health(&provider_id, &app_type, false, Some(error_msg.clone()))
+            .await;
+        log::warn!(
+            "Provider {} ({}) test failed: {}",
+            provider.name,
+            provider_id,
+            error_msg
+        );
+    }
+
+    Ok(success)
 }

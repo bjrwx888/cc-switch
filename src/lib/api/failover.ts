@@ -70,4 +70,12 @@ export const failoverApi = {
   ): Promise<CircuitBreakerStats | null> {
     return invoke("get_circuit_breaker_stats", { providerId, appType });
   },
+
+  // 测试供应商连接
+  async testProviderConnection(
+    providerId: string,
+    appType: string,
+  ): Promise<boolean> {
+    return invoke("test_provider_connection", { providerId, appType });
+  },
 };

@@ -9,6 +9,7 @@ import {
   type ProviderFormValues,
 } from "@/components/providers/forms/ProviderForm";
 import { providersApi, vscodeApi, type AppId } from "@/lib/api";
+import { cn } from "@/lib/utils";
 
 interface EditProviderDialogProps {
   open: boolean;
@@ -16,6 +17,7 @@ interface EditProviderDialogProps {
   onOpenChange: (open: boolean) => void;
   onSubmit: (provider: Provider) => Promise<void> | void;
   appId: AppId;
+  isProxyTakeover?: boolean;
 }
 
 export function EditProviderDialog({
@@ -24,6 +26,7 @@ export function EditProviderDialog({
   onOpenChange,
   onSubmit,
   appId,
+  isProxyTakeover = false,
 }: EditProviderDialogProps) {
   const { t } = useTranslation();
 
@@ -153,7 +156,11 @@ export function EditProviderDialog({
         <Button
           type="submit"
           form="provider-form"
-          className="bg-primary text-primary-foreground hover:bg-primary/90"
+          className={cn(
+            isProxyTakeover
+              ? "bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white"
+              : "bg-primary text-primary-foreground hover:bg-primary/90"
+          )}
         >
           <Save className="h-4 w-4 mr-2" />
           {t("common.save")}
@@ -168,6 +175,7 @@ export function EditProviderDialog({
         onCancel={() => onOpenChange(false)}
         initialData={initialData}
         showButtons={false}
+        isProxyTakeover={isProxyTakeover}
       />
     </FullScreenPanel>
   );

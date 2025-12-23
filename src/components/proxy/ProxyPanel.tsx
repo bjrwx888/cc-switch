@@ -10,7 +10,7 @@ import { useProviderHealth } from "@/lib/query/failover";
 import type { ProxyStatus } from "@/types/proxy";
 
 export function ProxyPanel() {
-  const { status, isRunning } = useProxyStatus();
+  const { status, isRunning, isTakeoverActive } = useProxyStatus();
   const [showSettings, setShowSettings] = useState(false);
 
   // 获取所有三个应用类型的代理目标列表
@@ -178,7 +178,11 @@ export function ProxyPanel() {
         )}
       </section>
 
-      <ProxySettingsDialog open={showSettings} onOpenChange={setShowSettings} />
+      <ProxySettingsDialog
+        open={showSettings}
+        onOpenChange={setShowSettings}
+        isProxyTakeover={isRunning && isTakeoverActive}
+      />
     </>
   );
 }

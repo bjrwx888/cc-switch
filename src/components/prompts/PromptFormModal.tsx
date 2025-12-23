@@ -10,8 +10,11 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Save } from "lucide-react";
 import MarkdownEditor from "@/components/MarkdownEditor";
 import type { Prompt, AppId } from "@/lib/api";
+import { useProxyStatus } from "@/hooks/useProxyStatus";
+import { cn } from "@/lib/utils";
 
 interface PromptFormModalProps {
   appId: AppId;
@@ -41,6 +44,8 @@ const PromptFormModal: React.FC<PromptFormModalProps> = ({
   const [content, setContent] = useState("");
   const [saving, setSaving] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const { isRunning, isTakeoverActive } = useProxyStatus();
+  const isProxyTakeover = isRunning && isTakeoverActive;
 
   useEffect(() => {
     // 检测初始暗色模式状态
@@ -148,7 +153,13 @@ const PromptFormModal: React.FC<PromptFormModalProps> = ({
             type="button"
             onClick={handleSave}
             disabled={!name.trim() || !content.trim() || saving}
+            className={cn(
+              isProxyTakeover
+                ? "bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700"
+                : ""
+            )}
           >
+            <Save className="mr-2 h-4 w-4" />
             {saving ? t("common.saving") : t("common.save")}
           </Button>
         </DialogFooter>

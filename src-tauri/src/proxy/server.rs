@@ -3,6 +3,8 @@
 //! 基于Axum的HTTP服务器，处理代理请求
 
 use super::{handlers, types::*, ProxyError};
+use super::circuit_recovery::CircuitRecoveryChecker;
+use super::provider_router::ProviderRouter;
 use crate::database::Database;
 use axum::{
     routing::{get, post},
@@ -34,10 +36,15 @@ pub struct ProxyServer {
     config: ProxyConfig,
     state: ProxyState,
     shutdown_tx: Arc<RwLock<Option<oneshot::Sender<()>>>>,
+    /// 熔断恢复检查器
+    recovery_checker: Arc<CircuitRecoveryChecker>,
 }
 
 impl ProxyServer {
     pub fn new(config: ProxyConfig, db: Arc<Database>) -> Self {
+        let router = Arc::new(ProviderRouter::new(db.clone()));
+        let recovery_checker = Arc::new(CircuitRecoveryChecker::new(db.clone(), router));
+
         let state = ProxyState {
             db,
             config: Arc::new(RwLock::new(config.clone())),
@@ -51,6 +58,7 @@ impl ProxyServer {
             config,
             state,
             shutdown_tx: Arc::new(RwLock::new(None)),
+            recovery_checker,
         }
     }
 
@@ -91,8 +99,12 @@ impl ProxyServer {
         // 记录启动时间
         *self.state.start_time.write().await = Some(std::time::Instant::now());
 
+        // 启动熔断恢复检查器
+        self.recovery_checker.start().await;
+
         // 启动服务器
         let state = self.state.clone();
+        let recovery_checker = self.recovery_checker.clone();
         tokio::spawn(async move {
             axum::serve(listener, app)
                 .with_graceful_shutdown(async {
@@ -104,6 +116,9 @@ impl ProxyServer {
             // 服务器停止后更新状态
             state.status.write().await.running = false;
             *state.start_time.write().await = None;
+
+            // 停止熔断恢复检查器
+            recovery_checker.stop().await;
         });
 
         Ok(ProxyServerInfo {
@@ -114,6 +129,9 @@ impl ProxyServer {
     }
 
     pub async fn stop(&self) -> Result<(), ProxyError> {
+        // 停止熔断恢复检查器
+        self.recovery_checker.stop().await;
+
         if let Some(tx) = self.shutdown_tx.write().await.take() {
             let _ = tx.send(());
             Ok(())

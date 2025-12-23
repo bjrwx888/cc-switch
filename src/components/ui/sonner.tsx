@@ -6,6 +6,7 @@ export function Toaster() {
       position="top-center"
       richColors
       theme="system"
+      closeButton
       toastOptions={{
         duration: 2000,
         classNames: {

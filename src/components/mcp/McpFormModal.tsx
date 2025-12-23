@@ -24,6 +24,8 @@ import { parseSmartMcpJson } from "@/utils/formatters";
 import { useMcpValidation } from "./useMcpValidation";
 import { useUpsertMcpServer } from "@/hooks/useMcp";
 import { FullScreenPanel } from "@/components/common/FullScreenPanel";
+import { useProxyStatus } from "@/hooks/useProxyStatus";
+import { cn } from "@/lib/utils";
 
 interface McpFormModalProps {
   editingId?: string;
@@ -49,6 +51,8 @@ const McpFormModal: React.FC<McpFormModalProps> = ({
     useMcpValidation();
 
   const upsertMutation = useUpsertMcpServer();
+  const { isRunning, isTakeoverActive } = useProxyStatus();
+  const isProxyTakeover = isRunning && isTakeoverActive;
 
   const [formId, setFormId] = useState(
     () => editingId || initialData?.id || "",
@@ -418,7 +422,12 @@ const McpFormModal: React.FC<McpFormModalProps> = ({
             type="button"
             onClick={handleSubmit}
             disabled={saving || (!isEditing && !!idError)}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            className={cn(
+              "disabled:opacity-50 disabled:cursor-not-allowed",
+              isProxyTakeover
+                ? "bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white"
+                : "bg-primary text-primary-foreground hover:bg-primary/90"
+            )}
           >
             {isEditing ? <Save size={16} /> : <Plus size={16} />}
             {saving
@@ -519,6 +528,7 @@ const McpFormModal: React.FC<McpFormModalProps> = ({
                     onCheckedChange={(checked: boolean) =>
                       setEnabledApps({ ...enabledApps, claude: checked })
                     }
+                    isProxyTakeover={isProxyTakeover}
                   />
                   <label
                     htmlFor="enable-claude"
@@ -535,6 +545,7 @@ const McpFormModal: React.FC<McpFormModalProps> = ({
                     onCheckedChange={(checked: boolean) =>
                       setEnabledApps({ ...enabledApps, codex: checked })
                     }
+                    isProxyTakeover={isProxyTakeover}
                   />
                   <label
                     htmlFor="enable-codex"
@@ -551,6 +562,7 @@ const McpFormModal: React.FC<McpFormModalProps> = ({
                     onCheckedChange={(checked: boolean) =>
                       setEnabledApps({ ...enabledApps, gemini: checked })
                     }
+                    isProxyTakeover={isProxyTakeover}
                   />
                   <label
                     htmlFor="enable-gemini"

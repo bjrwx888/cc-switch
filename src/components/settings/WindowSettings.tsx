@@ -6,9 +6,10 @@ import { AppWindow, MonitorUp, Power } from "lucide-react";
 interface WindowSettingsProps {
   settings: SettingsFormState;
   onChange: (updates: Partial<SettingsFormState>) => void;
+  isProxyTakeover?: boolean;
 }
 
-export function WindowSettings({ settings, onChange }: WindowSettingsProps) {
+export function WindowSettings({ settings, onChange, isProxyTakeover }: WindowSettingsProps) {
   const { t } = useTranslation();
 
   return (
@@ -25,6 +26,7 @@ export function WindowSettings({ settings, onChange }: WindowSettingsProps) {
           description={t("settings.launchOnStartupDescription")}
           checked={!!settings.launchOnStartup}
           onCheckedChange={(value) => onChange({ launchOnStartup: value })}
+          isProxyTakeover={isProxyTakeover}
         />
 
         <ToggleRow
@@ -35,6 +37,7 @@ export function WindowSettings({ settings, onChange }: WindowSettingsProps) {
           onCheckedChange={(value) =>
             onChange({ minimizeToTrayOnClose: value })
           }
+          isProxyTakeover={isProxyTakeover}
         />
 
         <ToggleRow
@@ -45,6 +48,7 @@ export function WindowSettings({ settings, onChange }: WindowSettingsProps) {
           onCheckedChange={(value) =>
             onChange({ enableClaudePluginIntegration: value })
           }
+          isProxyTakeover={isProxyTakeover}
         />
       </div>
     </section>
@@ -57,6 +61,7 @@ interface ToggleRowProps {
   description?: string;
   checked: boolean;
   onCheckedChange: (value: boolean) => void;
+  isProxyTakeover?: boolean;
 }
 
 function ToggleRow({
@@ -65,6 +70,7 @@ function ToggleRow({
   description,
   checked,
   onCheckedChange,
+  isProxyTakeover,
 }: ToggleRowProps) {
   return (
     <div className="flex items-center justify-between gap-4 rounded-xl border border-border bg-card/50 p-4 transition-colors hover:bg-muted/50">
@@ -83,6 +89,7 @@ function ToggleRow({
         checked={checked}
         onCheckedChange={onCheckedChange}
         aria-label={title}
+        isProxyTakeover={isProxyTakeover}
       />
     </div>
   );

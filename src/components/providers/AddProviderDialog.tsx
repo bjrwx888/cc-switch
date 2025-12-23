@@ -12,12 +12,14 @@ import {
 import { providerPresets } from "@/config/claudeProviderPresets";
 import { codexProviderPresets } from "@/config/codexProviderPresets";
 import { geminiProviderPresets } from "@/config/geminiProviderPresets";
+import { cn } from "@/lib/utils";
 
 interface AddProviderDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   appId: AppId;
   onSubmit: (provider: Omit<Provider, "id">) => Promise<void> | void;
+  isProxyTakeover?: boolean;
 }
 
 export function AddProviderDialog({
@@ -25,6 +27,7 @@ export function AddProviderDialog({
   onOpenChange,
   appId,
   onSubmit,
+  isProxyTakeover = false,
 }: AddProviderDialogProps) {
   const { t } = useTranslation();
 
@@ -175,7 +178,11 @@ export function AddProviderDialog({
       <Button
         type="submit"
         form="provider-form"
-        className="bg-primary text-primary-foreground hover:bg-primary/90"
+        className={cn(
+          isProxyTakeover
+            ? "bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white"
+            : "bg-primary text-primary-foreground hover:bg-primary/90"
+        )}
       >
         <Plus className="h-4 w-4 mr-2" />
         {t("common.add")}
@@ -196,6 +203,7 @@ export function AddProviderDialog({
         onSubmit={handleSubmit}
         onCancel={() => onOpenChange(false)}
         showButtons={false}
+        isProxyTakeover={isProxyTakeover}
       />
     </FullScreenPanel>
   );

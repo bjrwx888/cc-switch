@@ -34,6 +34,8 @@ impl std::fmt::Display for CircuitState {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CircuitBreakerConfig {
+    /// 是否启用自动故障转移
+    pub enabled: bool,
     /// 失败阈值 - 连续失败多少次后打开熔断器
     pub failure_threshold: u32,
     /// 成功阈值 - 半开状态下成功多少次后关闭熔断器
@@ -49,6 +51,7 @@ pub struct CircuitBreakerConfig {
 impl Default for CircuitBreakerConfig {
     fn default() -> Self {
         Self {
+            enabled: true,
             failure_threshold: 5,
             success_threshold: 2,
             timeout_seconds: 60,

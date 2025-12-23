@@ -433,7 +433,12 @@ function App() {
                     title={t("common.settings")}
                     className="hover:bg-black/5 dark:hover:bg-white/5"
                   >
-                  <Settings className="w-4 h-4"/>
+                  <Settings className={cn(
+                    "w-4 h-4",
+                    isProxyRunning && isTakeoverActive
+                      ? "text-emerald-500 dark:text-emerald-400"
+                      : "text-blue-500 dark:text-blue-400"
+                  )}/>
                   </Button>
                 </div>
                 <UpdateBadge onClick={() => setCurrentView("settings")} />
@@ -442,7 +447,7 @@ function App() {
           </div>
 
           <div
-            className="flex items-center gap-1.5 shrink whitespace-nowrap"
+            className="flex items-center gap-1.5 shrink-0 whitespace-nowrap"
             style={{ WebkitAppRegion: "no-drag" } as any}
           >
             {currentView === "prompts" && (
@@ -564,6 +569,7 @@ function App() {
         onOpenChange={setIsAddOpen}
         appId={activeApp}
         onSubmit={addProvider}
+        isProxyTakeover={isProxyRunning && isTakeoverActive}
       />
 
       <EditProviderDialog
@@ -576,6 +582,7 @@ function App() {
         }}
         onSubmit={handleEditProvider}
         appId={activeApp}
+        isProxyTakeover={isProxyRunning && isTakeoverActive}
       />
 
       {usageProvider && (

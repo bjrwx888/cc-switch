@@ -3,6 +3,7 @@
 //! 提供本地HTTP代理服务，支持多Provider故障转移和请求透传
 
 pub mod circuit_breaker;
+pub mod circuit_recovery;
 pub mod error;
 mod forwarder;
 mod handlers;
@@ -21,6 +22,8 @@ pub mod usage;
 pub use circuit_breaker::{
     CircuitBreaker, CircuitBreakerConfig, CircuitBreakerStats, CircuitState,
 };
+#[allow(unused_imports)]
+pub use circuit_recovery::CircuitRecoveryChecker;
 #[allow(unused_imports)]
 pub use error::ProxyError;
 #[allow(unused_imports)]

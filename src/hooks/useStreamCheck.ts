@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   streamCheckProvider,
   type StreamCheckResult,
@@ -10,6 +11,7 @@ import { failoverApi } from "@/lib/api/failover";
 
 export function useStreamCheck(appId: AppId) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [checkingIds, setCheckingIds] = useState<Set<string>>(new Set());
 
   const checkProvider = useCallback(
@@ -31,9 +33,16 @@ export function useStreamCheck(appId: AppId) {
             }),
           );
 
-          // 测试成功后重置健康状态（清除熔断/降级标记）
+          // 测试成功后更新健康状态
           try {
             await failoverApi.resetCircuitBreaker(providerId, appId);
+            // 刷新相关查询
+            queryClient.invalidateQueries({
+              queryKey: ["providerHealth", providerId, appId],
+            });
+            queryClient.invalidateQueries({
+              queryKey: ["proxyTargets", appId],
+            });
           } catch (e) {
             // 静默失败，不影响测试结果展示
             console.warn("Failed to reset circuit breaker after successful test:", e);
@@ -54,6 +63,14 @@ export function useStreamCheck(appId: AppId) {
               defaultValue: `${providerName} 检查失败: ${result.message}`,
             }),
           );
+
+          // 刷新健康状态（可能标记为失败）
+          queryClient.invalidateQueries({
+            queryKey: ["providerHealth", providerId, appId],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["proxyTargets", appId],
+          });
         }
 
         return result;
@@ -74,7 +91,7 @@ export function useStreamCheck(appId: AppId) {
         });
       }
     },
-    [appId, t],
+    [appId, t, queryClient],
   );
 
   const isChecking = useCallback(

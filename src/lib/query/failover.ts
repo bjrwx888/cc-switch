@@ -75,6 +75,10 @@ export function useResetCircuitBreaker() {
       queryClient.invalidateQueries({
         queryKey: ["providerHealth", variables.providerId, variables.appType],
       });
+      // 刷新代理目标列表
+      queryClient.invalidateQueries({
+        queryKey: ["proxyTargets", variables.appType],
+      });
     },
   });
 }
@@ -112,5 +116,32 @@ export function useCircuitBreakerStats(providerId: string, appType: string) {
     queryFn: () => failoverApi.getCircuitBreakerStats(providerId, appType),
     enabled: !!providerId && !!appType,
     refetchInterval: 5000, // 每 5 秒刷新一次
+  });
+}
+
+/**
+ * 测试供应商连接
+ */
+export function useTestProviderConnection() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      providerId,
+      appType,
+    }: {
+      providerId: string;
+      appType: string;
+    }) => failoverApi.testProviderConnection(providerId, appType),
+    onSuccess: (_, variables) => {
+      // 刷新健康状态
+      queryClient.invalidateQueries({
+        queryKey: ["providerHealth", variables.providerId, variables.appType],
+      });
+      // 刷新代理目标列表
+      queryClient.invalidateQueries({
+        queryKey: ["proxyTargets", variables.appType],
+      });
+    },
   });
 }

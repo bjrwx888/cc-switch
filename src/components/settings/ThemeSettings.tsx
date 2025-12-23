@@ -4,7 +4,11 @@ import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/components/theme-provider";
 
-export function ThemeSettings() {
+interface ThemeSettingsProps {
+  isProxyTakeover?: boolean;
+}
+
+export function ThemeSettings({ isProxyTakeover = false }: ThemeSettingsProps) {
   const { t } = useTranslation();
   const { theme, setTheme } = useTheme();
 
@@ -21,6 +25,7 @@ export function ThemeSettings() {
           active={theme === "light"}
           onClick={() => setTheme("light")}
           icon={Sun}
+          isProxyTakeover={isProxyTakeover}
         >
           {t("settings.themeLight")}
         </ThemeButton>
@@ -28,6 +33,7 @@ export function ThemeSettings() {
           active={theme === "dark"}
           onClick={() => setTheme("dark")}
           icon={Moon}
+          isProxyTakeover={isProxyTakeover}
         >
           {t("settings.themeDark")}
         </ThemeButton>
@@ -35,6 +41,7 @@ export function ThemeSettings() {
           active={theme === "system"}
           onClick={() => setTheme("system")}
           icon={Monitor}
+          isProxyTakeover={isProxyTakeover}
         >
           {t("settings.themeSystem")}
         </ThemeButton>
@@ -48,6 +55,7 @@ interface ThemeButtonProps {
   onClick: () => void;
   icon: React.ComponentType<{ className?: string }>;
   children: React.ReactNode;
+  isProxyTakeover?: boolean;
 }
 
 function ThemeButton({
@@ -55,6 +63,7 @@ function ThemeButton({
   onClick,
   icon: Icon,
   children,
+  isProxyTakeover = false,
 }: ThemeButtonProps) {
   return (
     <Button
@@ -65,7 +74,12 @@ function ThemeButton({
       className={cn(
         "min-w-[96px] gap-1.5",
         active
-          ? "shadow-sm"
+          ? cn(
+              "shadow-sm",
+              isProxyTakeover
+                ? "bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700"
+                : "bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
+            )
           : "text-muted-foreground hover:text-foreground hover:bg-muted",
       )}
     >

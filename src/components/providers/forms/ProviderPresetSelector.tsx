@@ -6,6 +6,7 @@ import type { ProviderPreset } from "@/config/claudeProviderPresets";
 import type { CodexProviderPreset } from "@/config/codexProviderPresets";
 import type { GeminiProviderPreset } from "@/config/geminiProviderPresets";
 import type { ProviderCategory } from "@/types";
+import { cn } from "@/lib/utils";
 
 type PresetEntry = {
   id: string;
@@ -19,6 +20,7 @@ interface ProviderPresetSelectorProps {
   presetCategoryLabels: Record<string, string>;
   onPresetChange: (value: string) => void;
   category?: ProviderCategory; // 当前选中的分类
+  isProxyTakeover?: boolean; // 是否处于代理接管模式
 }
 
 export function ProviderPresetSelector({
@@ -28,6 +30,7 @@ export function ProviderPresetSelector({
   presetCategoryLabels,
   onPresetChange,
   category,
+  isProxyTakeover = false,
 }: ProviderPresetSelectorProps) {
   const { t } = useTranslation();
 
@@ -95,8 +98,14 @@ export function ProviderPresetSelector({
       if (preset.theme?.backgroundColor) {
         return `${baseClass} text-white`;
       }
-      // 默认使用主题蓝色
-      return `${baseClass} bg-blue-500 text-white dark:bg-blue-600`;
+      // 根据代理状态使用不同的主题色
+      return cn(
+        baseClass,
+        "text-white",
+        isProxyTakeover
+          ? "bg-emerald-500 dark:bg-emerald-600"
+          : "bg-blue-500 dark:bg-blue-600"
+      );
     }
 
     return `${baseClass} bg-accent text-muted-foreground hover:bg-accent/80`;
@@ -125,11 +134,14 @@ export function ProviderPresetSelector({
         <button
           type="button"
           onClick={() => onPresetChange("custom")}
-          className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+          className={cn(
+            "inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
             selectedPresetId === "custom"
-              ? "bg-blue-500 text-white dark:bg-blue-600"
+              ? isProxyTakeover
+                ? "bg-emerald-500 text-white dark:bg-emerald-600"
+                : "bg-blue-500 text-white dark:bg-blue-600"
               : "bg-accent text-muted-foreground hover:bg-accent/80"
-          }`}
+          )}
         >
           {t("providerPreset.custom")}
         </button>

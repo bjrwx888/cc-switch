@@ -21,10 +21,13 @@ import { useRequestLogs, usageKeys } from "@/lib/query/usage";
 import { useQueryClient } from "@tanstack/react-query";
 import type { LogFilters } from "@/types/usage";
 import { ChevronLeft, ChevronRight, RefreshCw, Search, X } from "lucide-react";
+import { useProxyStatus } from "@/hooks/useProxyStatus";
+import { cn } from "@/lib/utils";
 
 export function RequestLogTable() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { isRunning, isTakeoverActive } = useProxyStatus();
 
   // 默认时间范围：过去24小时
   const getDefaultFilters = (): LogFilters => {
@@ -187,7 +190,12 @@ export function RequestLogTable() {
               size="sm"
               variant="default"
               onClick={handleSearch}
-              className="h-8"
+              className={cn(
+                "h-8",
+                isRunning && isTakeoverActive
+                  ? "bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700"
+                  : ""
+              )}
             >
               <Search className="mr-2 h-3.5 w-3.5" />
               {t("common.search", "查询")}
@@ -411,7 +419,12 @@ export function RequestLogTable() {
                         key={p}
                         variant={p === page ? "default" : "outline"}
                         size="sm"
-                        className="h-8 w-8 p-0"
+                        className={cn(
+                          "h-8 w-8 p-0",
+                          p === page && isRunning && isTakeoverActive
+                            ? "bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700"
+                            : ""
+                        )}
                         onClick={() => setPage(p)}
                       >
                         {p + 1}

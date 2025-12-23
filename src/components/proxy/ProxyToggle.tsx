@@ -91,10 +91,10 @@ export function ProxyToggle({ className }: ProxyToggleProps) {
   const statusColor = getStatusColor();
 
   return (
-    <div className="relative">
+    <div className="relative shrink-0">
       <div
         className={cn(
-          "flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all",
+          "flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all whitespace-nowrap",
           statusColor === "emerald" &&
             "bg-emerald-500/10 border border-emerald-500/30",
           statusColor === "blue" && "bg-blue-500/10 border border-blue-500/30",
@@ -168,9 +168,7 @@ export function ProxyToggle({ className }: ProxyToggleProps) {
               statusColor === "blue" && "text-blue-600 dark:text-blue-400",
             )}
           >
-            Proxy{" "}
-            {isMonitoring && <span className="text-xs opacity-70">(监控)</span>}
-            {isActive && <span className="text-xs opacity-70">(接管)</span>}
+            Proxy
           </span>
         )}
 

@@ -319,6 +319,34 @@ impl Database {
             [],
         );
 
+        // 尝试添加 enabled 列到 circuit_breaker_config 表
+        let _ = conn.execute(
+            "ALTER TABLE circuit_breaker_config ADD COLUMN enabled INTEGER NOT NULL DEFAULT 1",
+            [],
+        );
+
+        // 17. Failover Queue 表 (故障转移队列)
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS failover_queue (
+                app_type TEXT NOT NULL,
+                provider_id TEXT NOT NULL,
+                queue_order INTEGER NOT NULL,
+                enabled INTEGER NOT NULL DEFAULT 1,
+                created_at INTEGER NOT NULL,
+                PRIMARY KEY (app_type, provider_id),
+                FOREIGN KEY (provider_id, app_type) REFERENCES providers(id, app_type) ON DELETE CASCADE
+            )",
+            [],
+        )
+        .map_err(|e| AppError::Database(e.to_string()))?;
+
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_failover_queue_order
+             ON failover_queue(app_type, queue_order)",
+            [],
+        )
+        .map_err(|e| AppError::Database(e.to_string()))?;
+
         Ok(())
     }
 
@@ -357,6 +385,13 @@ impl Database {
                         );
                         Self::migrate_v1_to_v2(conn)?;
                         Self::set_user_version(conn, 2)?;
+                    }
+                    2 => {
+                        log::info!(
+                            "迁移数据库从 v2 到 v3（添加故障转移队列表）"
+                        );
+                        Self::migrate_v2_to_v3(conn)?;
+                        Self::set_user_version(conn, 3)?;
                     }
                     _ => {
                         return Err(AppError::Database(format!(
@@ -597,6 +632,35 @@ impl Database {
             .map_err(|e| AppError::Database(format!("删除旧 skills 表失败: {e}")))?;
 
         log::info!("skills 表迁移完成，共迁移 {count} 条记录");
+        Ok(())
+    }
+
+    /// v2 -> v3 迁移：添加故障转移队列表
+    fn migrate_v2_to_v3(conn: &Connection) -> Result<(), AppError> {
+        // 创建 failover_queue 表
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS failover_queue (
+                app_type TEXT NOT NULL,
+                provider_id TEXT NOT NULL,
+                queue_order INTEGER NOT NULL,
+                enabled INTEGER NOT NULL DEFAULT 1,
+                created_at INTEGER NOT NULL,
+                PRIMARY KEY (app_type, provider_id),
+                FOREIGN KEY (provider_id, app_type) REFERENCES providers(id, app_type) ON DELETE CASCADE
+            )",
+            [],
+        )
+        .map_err(|e| AppError::Database(format!("创建 failover_queue 表失败: {e}")))?;
+
+        // 创建索引
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_failover_queue_order
+             ON failover_queue(app_type, queue_order)",
+            [],
+        )
+        .map_err(|e| AppError::Database(format!("创建 failover_queue 索引失败: {e}")))?;
+
+        log::info!("故障转移队列表创建完成");
         Ok(())
     }
 

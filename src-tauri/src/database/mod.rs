@@ -37,14 +37,15 @@ use rusqlite::Connection;
 use serde::Serialize;
 use std::sync::Mutex;
 
-// DAO 方法通过 impl Database 提供，无需额外导出
+// 导出 FailoverQueueItem 类型
+pub use dao::failover::FailoverQueueItem;
 
 /// 数据库备份保留数量
 const DB_BACKUP_RETAIN: usize = 10;
 
 /// 当前 Schema 版本号
 /// 每次修改表结构时递增，并在 schema.rs 中添加相应的迁移逻辑
-pub(crate) const SCHEMA_VERSION: i32 = 2;
+pub(crate) const SCHEMA_VERSION: i32 = 3;
 
 /// 安全地序列化 JSON，避免 unwrap panic
 pub(crate) fn to_json_string<T: Serialize>(value: &T) -> Result<String, AppError> {

@@ -2,14 +2,22 @@ import * as React from "react";
 import * as SwitchPrimitives from "@radix-ui/react-switch";
 import { cn } from "@/lib/utils";
 
+interface SwitchProps
+  extends React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root> {
+  isProxyTakeover?: boolean;
+}
+
 const Switch = React.forwardRef<
   React.ElementRef<typeof SwitchPrimitives.Root>,
-  React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>
->(({ className, ...props }, ref) => (
+  SwitchProps
+>(({ className, isProxyTakeover, ...props }, ref) => (
   <SwitchPrimitives.Root
     ref={ref}
     className={cn(
-      "peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-emerald-500 dark:data-[state=checked]:bg-emerald-600 data-[state=unchecked]:bg-gray-300 dark:data-[state=unchecked]:bg-gray-700",
+      "peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=unchecked]:bg-gray-300 dark:data-[state=unchecked]:bg-gray-700",
+      isProxyTakeover
+        ? "data-[state=checked]:bg-emerald-500 dark:data-[state=checked]:bg-emerald-600"
+        : "data-[state=checked]:bg-primary",
       className,
     )}
     {...props}

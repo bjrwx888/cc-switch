@@ -11,9 +11,13 @@ import {
   saveStreamCheckConfig,
   type StreamCheckConfig,
 } from "@/lib/api/model-test";
+import { cn } from "@/lib/utils";
+import { useProxyStatus } from "@/hooks/useProxyStatus";
 
 export function ModelTestConfigPanel() {
   const { t } = useTranslation();
+  const { isRunning, isTakeoverActive } = useProxyStatus();
+  const isProxyTakeover = isRunning && isTakeoverActive;
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -190,7 +194,15 @@ export function ModelTestConfigPanel() {
       </div>
 
       <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={isSaving}>
+        <Button
+          onClick={handleSave}
+          disabled={isSaving}
+          className={cn(
+            isProxyTakeover
+              ? "bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700"
+              : ""
+          )}
+        >
           {isSaving ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

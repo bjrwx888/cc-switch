@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import type { ImportStatus } from "@/hooks/useImportExport";
+import { cn } from "@/lib/utils";
 
 interface ImportExportSectionProps {
   status: ImportStatus;
@@ -17,6 +18,7 @@ interface ImportExportSectionProps {
   errorMessage: string | null;
   backupId: string | null;
   isImporting: boolean;
+  isProxyTakeover?: boolean;
   onSelectFile: () => Promise<void>;
   onImport: () => Promise<void>;
   onExport: () => Promise<void>;
@@ -29,6 +31,7 @@ export function ImportExportSection({
   errorMessage,
   backupId,
   isImporting,
+  isProxyTakeover = false,
   onSelectFile,
   onImport,
   onExport,
@@ -60,7 +63,13 @@ export function ImportExportSection({
           <div className="relative">
             <Button
               type="button"
-              className={`w-full h-auto py-3 px-4 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white ${selectedFile && !isImporting ? "flex-col items-start" : "items-center"}`}
+              className={cn(
+                "w-full h-auto py-3 px-4 text-white",
+                isProxyTakeover
+                  ? "bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700"
+                  : "bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700",
+                selectedFile && !isImporting ? "flex-col items-start" : "items-center"
+              )}
               onClick={!selectedFile ? onSelectFile : onImport}
               disabled={isImporting}
             >
@@ -104,7 +113,12 @@ export function ImportExportSection({
           <div>
             <Button
               type="button"
-              className="w-full h-full py-3 px-4 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white items-center"
+              className={cn(
+                "w-full h-full py-3 px-4 text-white items-center",
+                isProxyTakeover
+                  ? "bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700"
+                  : "bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
+              )}
               onClick={onExport}
             >
               <Save className="mr-2 h-4 w-4" />

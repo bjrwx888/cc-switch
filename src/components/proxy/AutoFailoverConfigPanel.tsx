@@ -10,6 +10,8 @@ import {
   useCircuitBreakerConfig,
   useUpdateCircuitBreakerConfig,
 } from "@/lib/query/failover";
+import { useProxyStatus } from "@/hooks/useProxyStatus";
+import { cn } from "@/lib/utils";
 
 export interface AutoFailoverConfigPanelProps {
   enabled: boolean;
@@ -18,16 +20,16 @@ export interface AutoFailoverConfigPanelProps {
 
 export function AutoFailoverConfigPanel({
   enabled,
-  onEnabledChange: _onEnabledChange,
+  onEnabledChange,
 }: AutoFailoverConfigPanelProps) {
-  // Note: onEnabledChange is currently unused but kept in the interface
-  // for potential future use by parent components
-  void _onEnabledChange;
   const { t } = useTranslation();
   const { data: config, isLoading, error } = useCircuitBreakerConfig();
   const updateConfig = useUpdateCircuitBreakerConfig();
+  const { isRunning, isTakeoverActive } = useProxyStatus();
+  const isProxyTakeover = isRunning && isTakeoverActive;
 
   const [formData, setFormData] = useState({
+    enabled: true,
     failureThreshold: 5,
     successThreshold: 2,
     timeoutSeconds: 60,
@@ -35,17 +37,31 @@ export function AutoFailoverConfigPanel({
     minRequests: 10,
   });
 
+  // 当配置加载完成时，同步 enabled 状态到父组件
   useEffect(() => {
     if (config) {
       setFormData({
         ...config,
       });
+      // 同步 enabled 状态到父组件的开关
+      if (config.enabled !== enabled) {
+        onEnabledChange(config.enabled);
+      }
     }
-  }, [config]);
+  }, [config, enabled, onEnabledChange]);
+
+  // 当父组件的开关变化时，更新 formData
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      enabled,
+    }));
+  }, [enabled]);
 
   const handleSave = async () => {
     try {
       await updateConfig.mutateAsync({
+        enabled: enabled,
         failureThreshold: formData.failureThreshold,
         successThreshold: formData.successThreshold,
         timeoutSeconds: formData.timeoutSeconds,
@@ -67,6 +83,7 @@ export function AutoFailoverConfigPanel({
       setFormData({
         ...config,
       });
+      onEnabledChange(config.enabled);
     }
   };
 
@@ -80,14 +97,6 @@ export function AutoFailoverConfigPanel({
 
   return (
     <div className="border-0 rounded-none shadow-none bg-transparent">
-      {/* Header Switch moved to parent accordion logic or kept here absolutely positioned if styling permits.
-            Since we need it in the accordion header, and this component is inside the content, we can use a portal or
-            absolute positioning trick similar to ProxyPanel, OR cleaner, just duplicate the switch logic in SettingsPage
-            and pass it down. But for now, let's use the absolute positioning trick to "lift" it visually.
-            Better yet, let's just render the content directly without the wrapping Card header/collapse logic
-            since the user requested "click to expand is detailed info, no need to fold again" (implying the accordion handles folding).
-        */}
-
       <div className="space-y-4">
         {error && (
           <Alert variant="destructive">
@@ -169,7 +178,10 @@ export function AutoFailoverConfigPanel({
         {/* 熔断器高级配置 */}
         <div className="space-y-4 rounded-lg border border-white/10 bg-muted/30 p-4">
           <h4 className="text-sm font-semibold">
-            {t("proxy.autoFailover.circuitBreakerSettings", "熔断器高级设置")}
+            {t(
+              "proxy.autoFailover.circuitBreakerSettings",
+              "熔断器高级设置",
+            )}
           </h4>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -213,7 +225,8 @@ export function AutoFailoverConfigPanel({
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    errorRateThreshold: (parseInt(e.target.value) || 50) / 100,
+                    errorRateThreshold:
+                      (parseInt(e.target.value) || 50) / 100,
                   })
                 }
                 disabled={!enabled}
@@ -266,6 +279,11 @@ export function AutoFailoverConfigPanel({
           <Button
             onClick={handleSave}
             disabled={updateConfig.isPending || !enabled}
+            className={cn(
+              isProxyTakeover
+                ? "bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700"
+                : ""
+            )}
           >
             {updateConfig.isPending ? (
               <>
@@ -312,7 +330,10 @@ export function AutoFailoverConfigPanel({
             <li>
               •{" "}
               <strong>
-                {t("proxy.autoFailover.successThresholdLabel", "恢复成功阈值")}
+                {t(
+                  "proxy.autoFailover.successThresholdLabel",
+                  "恢复成功阈值",
+                )}
               </strong>
               ：
               {t(
