@@ -16,6 +16,10 @@ pub mod skill;
 mod stream_check;
 mod usage;
 
+// Claude Code Session and Agent modules (from opcode)
+pub mod claude;
+pub mod agents;
+
 pub use config::*;
 pub use deeplink::*;
 pub use env::*;
@@ -31,3 +35,7 @@ pub use settings::*;
 pub use skill::*;
 pub use stream_check::*;
 pub use usage::*;
+
+// Re-export Claude Code commands
+pub use claude::*;
+pub use agents::*;

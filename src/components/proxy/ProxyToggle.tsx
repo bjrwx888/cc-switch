@@ -118,17 +118,10 @@ export function ProxyToggle({ className }: ProxyToggleProps) {
         )}
 
         {!isRunning ? (
-          // 未运行时，点击文字可选择模式
+          // 未运行时，点击图标可选择模式
           <DropdownMenu open={showModeMenu} onOpenChange={setShowModeMenu}>
             <DropdownMenuTrigger asChild>
-              <span
-                className={cn(
-                  "text-sm font-medium transition-colors select-none cursor-pointer hover:opacity-80",
-                  statusColor === "muted" && "text-muted-foreground",
-                )}
-              >
-                Proxy
-              </span>
+              <span className="sr-only">选择代理模式</span>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-72">
               <DropdownMenuLabel>选择代理模式</DropdownMenuLabel>
@@ -158,19 +151,7 @@ export function ProxyToggle({ className }: ProxyToggleProps) {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        ) : (
-          // 运行中时，仅显示状态文字
-          <span
-            className={cn(
-              "text-sm font-medium transition-colors select-none",
-              statusColor === "emerald" &&
-                "text-emerald-600 dark:text-emerald-400",
-              statusColor === "blue" && "text-blue-600 dark:text-blue-400",
-            )}
-          >
-            Proxy
-          </span>
-        )}
+        ) : null}
 
         <Switch
           checked={isRunning}

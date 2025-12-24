@@ -28,6 +28,7 @@ interface ToolVersion {
   name: string;
   version: string | null;
   latest_version: string | null;
+  path: string | null;
   error: string | null;
 }
 
@@ -94,13 +95,13 @@ export function AboutSection({ isPortable, isProxyTakeover = false }: AboutSecti
 
       if (!displayVersion) {
         await settingsApi.openExternal(
-          "https://github.com/farion1231/cc-switch/releases",
+          "https://github.com/bjrwx888/cc-switch/releases",
         );
         return;
       }
 
       await settingsApi.openExternal(
-        `https://github.com/farion1231/cc-switch/releases/tag/${displayVersion}`,
+        `https://github.com/bjrwx888/cc-switch/releases/tag/${displayVersion}`,
       );
     } catch (error) {
       console.error("[AboutSection] Failed to open release notes", error);
@@ -163,7 +164,7 @@ export function AboutSection({ isPortable, isProxyTakeover = false }: AboutSecti
         </p>
       </header>
 
-      <div className="rounded-xl border border-border bg-card/50 p-6 space-y-6">
+      <div className="p-6 space-y-6 border rounded-xl border-border bg-card/50">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
             <h4 className="text-lg font-semibold text-foreground">CC Switch</h4>
@@ -173,14 +174,14 @@ export function AboutSection({ isPortable, isProxyTakeover = false }: AboutSecti
                   {t("common.version")}
                 </span>
                 {isLoadingVersion ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
+                  <Loader2 className="w-3 h-3 animate-spin" />
                 ) : (
                   <span className="font-medium">{`v${displayVersion}`}</span>
                 )}
               </Badge>
               {isPortable && (
                 <Badge variant="secondary" className="gap-1.5">
-                  <Info className="h-3 w-3" />
+                  <Info className="w-3 h-3" />
                   {t("settings.portableMode")}
                 </Badge>
               )}
@@ -195,7 +196,7 @@ export function AboutSection({ isPortable, isProxyTakeover = false }: AboutSecti
               onClick={handleOpenReleaseNotes}
               className="h-9"
             >
-              <ExternalLink className="mr-2 h-4 w-4" />
+              <ExternalLink className="w-4 h-4 mr-2" />
               {t("settings.releaseNotes")}
             </Button>
             <Button
@@ -212,19 +213,19 @@ export function AboutSection({ isPortable, isProxyTakeover = false }: AboutSecti
             >
               {isDownloading ? (
                 <span className="inline-flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin" />
                   {t("settings.updating")}
                 </span>
               ) : hasUpdate ? (
                 <span className="inline-flex items-center gap-2">
-                  <Download className="h-4 w-4" />
+                  <Download className="w-4 h-4" />
                   {t("settings.updateTo", {
                     version: updateInfo?.availableVersion ?? "",
                   })}
                 </span>
               ) : isChecking ? (
                 <span className="inline-flex items-center gap-2">
-                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  <RefreshCw className="w-4 h-4 animate-spin" />
                   {t("settings.checking")}
                 </span>
               ) : (
@@ -235,14 +236,14 @@ export function AboutSection({ isPortable, isProxyTakeover = false }: AboutSecti
         </div>
 
         {hasUpdate && updateInfo && (
-          <div className="rounded-lg bg-primary/10 border border-primary/20 px-4 py-3 text-sm">
-            <p className="font-medium text-primary mb-1">
+          <div className="px-4 py-3 text-sm border rounded-lg bg-primary/10 border-primary/20">
+            <p className="mb-1 font-medium text-primary">
               {t("settings.updateAvailable", {
                 version: updateInfo.availableVersion,
               })}
             </p>
             {updateInfo.notes && (
-              <p className="text-muted-foreground line-clamp-3 leading-relaxed">
+              <p className="leading-relaxed text-muted-foreground line-clamp-3">
                 {updateInfo.notes}
               </p>
             )}
@@ -251,7 +252,7 @@ export function AboutSection({ isPortable, isProxyTakeover = false }: AboutSecti
       </div>
 
       <div className="space-y-3">
-        <h4 className="text-sm font-medium text-muted-foreground px-1">
+        <h4 className="px-1 text-sm font-medium text-muted-foreground">
           本地环境检查
         </h4>
         <div className="grid gap-3 sm:grid-cols-3">
@@ -259,17 +260,17 @@ export function AboutSection({ isPortable, isProxyTakeover = false }: AboutSecti
             ? Array.from({ length: 3 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-20 rounded-xl border border-border bg-card/50 animate-pulse"
+                  className="h-20 border rounded-xl border-border bg-card/50 animate-pulse"
                 />
               ))
             : toolVersions.map((tool) => (
                 <div
                   key={tool.name}
-                  className="flex flex-col gap-2 rounded-xl border border-border bg-card/50 p-4 transition-colors hover:bg-muted/50"
+                  className="flex flex-col gap-2 p-4 transition-colors border rounded-xl border-border bg-card/50 hover:bg-muted/50"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Terminal className="h-4 w-4 text-muted-foreground" />
+                      <Terminal className="w-4 h-4 text-muted-foreground" />
                       <span className="text-sm font-medium capitalize">
                         {tool.name}
                       </span>
@@ -282,19 +283,27 @@ export function AboutSection({ isPortable, isProxyTakeover = false }: AboutSecti
                               Update: {tool.latest_version}
                             </span>
                           )}
-                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        <CheckCircle2 className="w-4 h-4 text-green-500" />
                       </div>
                     ) : (
-                      <AlertCircle className="h-4 w-4 text-yellow-500" />
+                      <AlertCircle className="w-4 h-4 text-yellow-500" />
                     )}
                   </div>
                   <div className="flex flex-col gap-0.5">
                     <div
-                      className="text-xs font-mono truncate"
+                      className="font-mono text-xs truncate"
                       title={tool.version || tool.error || "Unknown"}
                     >
                       {tool.version ? tool.version : tool.error || "未安装"}
                     </div>
+                    {tool.path && (
+                      <div
+                        className="text-[10px] text-muted-foreground font-mono truncate"
+                        title={tool.path}
+                      >
+                        {tool.path}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

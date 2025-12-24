@@ -347,6 +347,60 @@ impl Database {
         )
         .map_err(|e| AppError::Database(e.to_string()))?;
 
+
+        // 18. Agents table (Claude Code agents from opcode)
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS agents (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                icon TEXT NOT NULL DEFAULT 'bot',
+                system_prompt TEXT NOT NULL,
+                default_task TEXT,
+                model TEXT NOT NULL DEFAULT 'sonnet',
+                enable_file_read INTEGER NOT NULL DEFAULT 1,
+                enable_file_write INTEGER NOT NULL DEFAULT 1,
+                enable_network INTEGER NOT NULL DEFAULT 0,
+                hooks TEXT,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )",
+            [],
+        )
+        .map_err(|e| AppError::Database(e.to_string()))?;
+
+        // 19. Agent Runs table (Claude Code agent execution history)
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS agent_runs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                agent_id INTEGER NOT NULL,
+                agent_name TEXT NOT NULL,
+                task TEXT NOT NULL,
+                model TEXT NOT NULL,
+                project_path TEXT NOT NULL,
+                session_id TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'pending',
+                pid INTEGER,
+                process_started_at TEXT,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                completed_at TEXT,
+                FOREIGN KEY (agent_id) REFERENCES agents(id) ON DELETE CASCADE
+            )",
+            [],
+        )
+        .map_err(|e| AppError::Database(e.to_string()))?;
+
+        // 20. App Settings table (Claude Code specific settings)
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS app_settings (
+                key TEXT PRIMARY KEY,
+                value TEXT,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )",
+            [],
+        )
+        .map_err(|e| AppError::Database(e.to_string()))?;
+
         Ok(())
     }
 

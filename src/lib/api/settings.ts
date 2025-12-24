@@ -121,6 +121,7 @@ export const settingsApi = {
       name: string;
       version: string | null;
       latest_version: string | null;
+      path: string | null;
       error: string | null;
     }>
   > {

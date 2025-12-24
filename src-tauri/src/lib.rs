@@ -24,6 +24,11 @@ mod store;
 mod tray;
 mod usage_script;
 
+// Claude Code Session modules (from opcode)
+mod checkpoint;
+mod process;
+mod claude_binary;
+
 pub use app_config::{AppType, McpApps, McpServer, MultiAppConfig};
 pub use codex_config::{get_codex_auth_path, get_codex_config_path, write_codex_live_atomic};
 pub use commands::*;
@@ -690,6 +695,78 @@ pub fn run() {
             commands::get_stream_check_config,
             commands::save_stream_check_config,
             commands::get_tool_versions,
+            // Claude Code Session commands (from opcode)
+            commands::get_home_directory,
+            commands::list_projects,
+            commands::create_project,
+            commands::get_project_sessions,
+            commands::get_claude_settings,
+            commands::open_new_session,
+            commands::get_system_prompt,
+            commands::check_claude_version,
+            commands::save_system_prompt,
+            commands::save_claude_settings,
+            commands::find_claude_md_files,
+            commands::read_claude_md_file,
+            commands::save_claude_md_file,
+            commands::load_session_history,
+            commands::execute_claude_code,
+            commands::continue_claude_code,
+            commands::resume_claude_code,
+            commands::cancel_claude_execution,
+            commands::list_running_claude_sessions,
+            commands::get_claude_session_output,
+            commands::list_directory_contents,
+            commands::search_files,
+            // Checkpoint commands
+            commands::create_checkpoint,
+            commands::restore_checkpoint,
+            commands::list_checkpoints,
+            commands::fork_from_checkpoint,
+            commands::get_session_timeline,
+            commands::update_checkpoint_settings,
+            commands::get_checkpoint_diff,
+            commands::track_checkpoint_message,
+            commands::check_auto_checkpoint,
+            commands::cleanup_old_checkpoints,
+            commands::get_checkpoint_settings,
+            commands::clear_checkpoint_manager,
+            commands::get_checkpoint_state_stats,
+            commands::get_recently_modified_files,
+            commands::track_session_messages,
+            // Hooks commands
+            commands::get_hooks_config,
+            commands::update_hooks_config,
+            commands::validate_hook_command,
+            // Agent commands (from opcode)
+            commands::list_agents,
+            commands::create_agent,
+            commands::update_agent,
+            commands::delete_agent,
+            commands::get_agent,
+            commands::list_agent_runs,
+            commands::get_agent_run,
+            commands::get_agent_run_with_real_time_metrics,
+            commands::list_agent_runs_with_metrics,
+            commands::execute_agent,
+            commands::list_running_sessions,
+            commands::kill_agent_session,
+            commands::get_session_status,
+            commands::cleanup_finished_processes,
+            commands::get_live_session_output,
+            commands::get_session_output,
+            commands::stream_session_output,
+            commands::export_agent,
+            commands::export_agent_to_file,
+            commands::get_claude_binary_path,
+            commands::set_claude_binary_path,
+            commands::list_claude_installations,
+            commands::import_agent,
+            commands::import_agent_from_file,
+            commands::fetch_github_agents,
+            commands::fetch_github_agent_content,
+            commands::import_agent_from_github,
+            commands::load_agent_session_history,
         ]);
 
     let app = builder

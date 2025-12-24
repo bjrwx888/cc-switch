@@ -6,11 +6,11 @@ import {
   Plus,
   Settings,
   ArrowLeft,
-  // Bot, // TODO: Agents 功能开发中，暂时不需要
   Book,
   Wrench,
   Server,
   RefreshCw,
+  MessageSquare,
 } from "lucide-react";
 import type { Provider } from "@/types";
 import type { EnvConflict } from "@/types/env";
@@ -41,9 +41,10 @@ import PromptPanel from "@/components/prompts/PromptPanel";
 import { SkillsPage } from "@/components/skills/SkillsPage";
 import { DeepLinkImportDialog } from "@/components/DeepLinkImportDialog";
 import { AgentsPanel } from "@/components/agents/AgentsPanel";
+import { ChatPage } from "@/components/chat/ChatPage";
 import { Button } from "@/components/ui/button";
 
-type View = "providers" | "settings" | "prompts" | "skills" | "mcp" | "agents";
+type View = "providers" | "settings" | "prompts" | "skills" | "mcp" | "agents" | "chat";
 
 function App() {
   const { t } = useTranslation();
@@ -311,6 +312,8 @@ function App() {
         );
       case "agents":
         return <AgentsPanel onOpenChange={() => setCurrentView("providers")} />;
+      case "chat":
+        return <ChatPage onClose={() => setCurrentView("providers")} />;
       default:
         return (
           <div className="mx-auto w-full max-w-none px-5 flex flex-col min-w-0 h-[calc(100vh-8rem)] overflow-visible">
@@ -383,7 +386,7 @@ function App() {
       >
         <div className="w-full h-4" aria-hidden data-tauri-drag-region />
         <div
-          className="flex items-center justify-between w-full min-w-0 gap-1 pl-5 pr-5 mx-auto overflow-visible max-w-none whitespace-nowrap"
+          className="flex items-center justify-between w-full min-w-0 gap-1 pl-5 mx-auto overflow-visible pr-28 max-w-none whitespace-nowrap"
           data-tauri-drag-region
           style={{ WebkitAppRegion: "drag" } as any}
         >
@@ -408,13 +411,14 @@ function App() {
                   {currentView === "skills" && t("skills.title")}
                   {currentView === "mcp" && t("mcp.unifiedPanel.title")}
                   {currentView === "agents" && t("agents.title")}
+                  {currentView === "chat" && "Claude Code"}
                 </h1>
               </div>
             ) : (
               <>
                 <div className="flex items-center gap-1">
                   <a
-                    href="https://github.com/farion1231/cc-switch"
+                    href="https://github.com/bjrwx888/cc-switch"
                     target="_blank"
                     rel="noreferrer"
                     className={cn(
@@ -454,7 +458,7 @@ function App() {
               <Button
                 size="icon"
                 onClick={() => promptPanelRef.current?.openAdd()}
-                className={addActionButtonClass}
+                className={`ml-[20%] ${addActionButtonClass}`}
                 title={t("prompts.add")}
               >
                 <Plus className="w-5 h-5" />
@@ -464,7 +468,7 @@ function App() {
               <Button
                 size="icon"
                 onClick={() => mcpPanelRef.current?.openAdd()}
-                className={addActionButtonClass}
+                className={`ml-[20%] ${addActionButtonClass}`}
                 title={t("mcp.unifiedPanel.addServer")}
               >
                 <Plus className="w-5 h-5" />
@@ -510,6 +514,16 @@ function App() {
                       <Wrench className="w-4 h-4" />
                     </Button>
                   )}
+                  {/* Claude Code Chat */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setCurrentView("chat")}
+                    className="text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5"
+                    title="Claude Code"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                  </Button>
                   {/* TODO: Agents 功能开发中，暂时隐藏入口 */}
                   {/* {isClaudeApp && (
                     <Button

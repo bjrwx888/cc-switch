@@ -26,7 +26,7 @@ pub async fn check_for_updates(handle: AppHandle) -> Result<bool, String> {
     handle
         .opener()
         .open_url(
-            "https://github.com/farion1231/cc-switch/releases/latest",
+            "https://github.com/bjrwx888/cc-switch/releases/latest",
             None::<String>,
         )
         .map_err(|e| format!("打开更新页面失败: {e}"))?;
@@ -63,7 +63,8 @@ pub async fn get_migration_result() -> Result<bool, String> {
 pub struct ToolVersion {
     name: String,
     version: Option<String>,
-    latest_version: Option<String>, // 新增字段：最新版本
+    latest_version: Option<String>,
+    path: Option<String>,  // CLI 路径
     error: Option<String>,
 }
 
@@ -79,16 +80,16 @@ pub async fn get_tool_versions() -> Result<Vec<ToolVersion>, String> {
         .map_err(|e| e.to_string())?;
 
     for tool in tools {
-        // 1. 获取本地版本 - 先尝试直接执行，失败则扫描常见路径
-        let (local_version, local_error) = {
+        // 1. 获取本地版本和路径 - 先尝试直接执行，失败则扫描常见路径
+        let (local_version, local_error, local_path) = {
             // 先尝试直接执行
-            let direct_result = try_get_version(tool);
+            let direct_result = try_get_version_with_path(tool);
 
             if direct_result.0.is_some() {
                 direct_result
             } else {
                 // 扫描常见的 npm 全局安装路径
-                scan_cli_version(tool)
+                scan_cli_version_with_path(tool)
             }
         };
 
@@ -104,6 +105,7 @@ pub async fn get_tool_versions() -> Result<Vec<ToolVersion>, String> {
             name: tool.to_string(),
             version: local_version,
             latest_version,
+            path: local_path,
             error: local_error,
         });
     }
@@ -248,4 +250,147 @@ fn scan_cli_version(tool: &str) -> (Option<String>, Option<String>) {
     }
 
     (None, Some("未安装或无法执行".to_string()))
+}
+
+/// 尝试直接执行命令获取版本（带路径）
+fn try_get_version_with_path(tool: &str) -> (Option<String>, Option<String>, Option<String>) {
+    use std::process::Command;
+
+    // 尝试使用 where/which 找到实际路径
+    let path = if cfg!(target_os = "windows") {
+        Command::new("cmd")
+            .args(["/C", &format!("where {tool}")])
+            .output()
+            .ok()
+            .and_then(|out| {
+                if out.status.success() {
+                    String::from_utf8_lossy(&out.stdout)
+                        .lines()
+                        .next()
+                        .map(|s| s.trim().to_string())
+                } else {
+                    None
+                }
+            })
+    } else {
+        Command::new("which")
+            .arg(tool)
+            .output()
+            .ok()
+            .and_then(|out| {
+                if out.status.success() {
+                    Some(String::from_utf8_lossy(&out.stdout).trim().to_string())
+                } else {
+                    None
+                }
+            })
+    };
+
+    let output = if cfg!(target_os = "windows") {
+        Command::new("cmd")
+            .args(["/C", &format!("{tool} --version")])
+            .output()
+    } else {
+        Command::new("sh")
+            .arg("-c")
+            .arg(format!("{tool} --version"))
+            .output()
+    };
+
+    match output {
+        Ok(out) => {
+            if out.status.success() {
+                let raw = String::from_utf8_lossy(&out.stdout).trim().to_string();
+                (Some(extract_version(&raw)), None, path)
+            } else {
+                let err = String::from_utf8_lossy(&out.stderr).trim().to_string();
+                (
+                    None,
+                    Some(if err.is_empty() {
+                        "未安装或无法执行".to_string()
+                    } else {
+                        err
+                    }),
+                    path,
+                )
+            }
+        }
+        Err(e) => (None, Some(e.to_string()), None),
+    }
+}
+
+/// 扫描常见路径查找 CLI（带路径）
+fn scan_cli_version_with_path(tool: &str) -> (Option<String>, Option<String>, Option<String>) {
+    use std::process::Command;
+
+    let home = dirs::home_dir().unwrap_or_default();
+
+    // 常见的 npm 全局安装路径
+    let mut search_paths: Vec<std::path::PathBuf> = vec![
+        home.join(".npm-global/bin"),
+        home.join(".local/bin"),
+        home.join("n/bin"), // n version manager
+    ];
+
+    #[cfg(target_os = "macos")]
+    {
+        search_paths.push(std::path::PathBuf::from("/opt/homebrew/bin"));
+        search_paths.push(std::path::PathBuf::from("/usr/local/bin"));
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        search_paths.push(std::path::PathBuf::from("/usr/local/bin"));
+        search_paths.push(std::path::PathBuf::from("/usr/bin"));
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        if let Some(appdata) = dirs::data_dir() {
+            search_paths.push(appdata.join("npm"));
+        }
+        search_paths.push(std::path::PathBuf::from("C:\\Program Files\\nodejs"));
+    }
+
+    // 扫描 nvm 目录下的所有 node 版本
+    let nvm_base = home.join(".nvm/versions/node");
+    if nvm_base.exists() {
+        if let Ok(entries) = std::fs::read_dir(&nvm_base) {
+            for entry in entries.flatten() {
+                let bin_path = entry.path().join("bin");
+                if bin_path.exists() {
+                    search_paths.push(bin_path);
+                }
+            }
+        }
+    }
+
+    // 在每个路径中查找工具
+    for path in &search_paths {
+        let tool_path = if cfg!(target_os = "windows") {
+            path.join(format!("{tool}.cmd"))
+        } else {
+            path.join(tool)
+        };
+
+        if tool_path.exists() {
+            // 构建 PATH 环境变量，确保 node 可被找到
+            let current_path = std::env::var("PATH").unwrap_or_default();
+            let new_path = format!("{}:{}", path.display(), current_path);
+
+            let output = Command::new(&tool_path)
+                .arg("--version")
+                .env("PATH", &new_path)
+                .output();
+
+            if let Ok(out) = output {
+                if out.status.success() {
+                    let raw = String::from_utf8_lossy(&out.stdout).trim().to_string();
+                    return (Some(extract_version(&raw)), None, Some(tool_path.to_string_lossy().to_string()));
+                }
+            }
+        }
+    }
+
+    (None, Some("未安装或无法执行".to_string()), None)
 }
